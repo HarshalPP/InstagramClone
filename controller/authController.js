@@ -338,9 +338,9 @@ exports.Login = async (req, res) => {
           success: true,
           user: {
             _id: user._id,
-            firstname: user.firstName,
-            lastname: user.lastName,
+            Username: user.Username,
             email: user.email,
+            profilePicture:user.profilePicture
           },
           token: user.activeToken,
         });
@@ -351,9 +351,9 @@ exports.Login = async (req, res) => {
           success: true,
           user: {
             _id: user._id,
-            firstname: user.firstName,
-            lastname: user.lastName,
+            Username: user.Username,
             email: user.email,
+            profilePicture:user.profilePicture
           },
           token: token,
         });
@@ -373,9 +373,9 @@ exports.Login = async (req, res) => {
         success: true,
         user: {
           _id: user._id,
-          firstname: user.firstName,
-          lastname: user.lastName,
+          Username: user.Username,
           email: user.email,
+          profilePicture:user.profilePicture
         },
         token: user.activeToken,  
       });
@@ -386,9 +386,9 @@ exports.Login = async (req, res) => {
         success: true,
         user: {
           _id: user._id,
-          firstname: user.firstName,
-          lastname: user.lastName,
+          Username: user.Username,
           email: user.email,
+          profilePicture:user.profilePicture
         },
         token: token,
       });
