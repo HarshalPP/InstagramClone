@@ -1,4 +1,5 @@
 const User = require("../models/User")
+const Post = require("../models/Post")
 const { sendToken } = require("../Utils/Token")
 const jwt = require('jsonwebtoken')
 const csv = require('csv-parser');  // Assuming you're using CSV data
@@ -323,7 +324,18 @@ exports.Login = async (req, res) => {
     }
 
 
-    // const populatedPost = 
+
+    const populatedPost = await Promise.all(
+   
+        user.posts.map(async(postId)=>{
+         const Posts = await Post.findById(postId)
+         if(Posts.author.equals(user._id)){
+          return Posts;
+         }
+         return null
+        })
+
+    )
 
     // Function to generate and update active token
     const generateAndUpdateToken = async () => {
@@ -344,7 +356,8 @@ exports.Login = async (req, res) => {
             _id: user._id,
             Username: user.Username,
             email: user.email,
-            profilePicture:user.profilePicture
+            profilePicture:user.profilePicture,
+            Post:populatedPost
           },
           token: user.activeToken,
         });
@@ -357,7 +370,8 @@ exports.Login = async (req, res) => {
             _id: user._id,
             Username: user.Username,
             email: user.email,
-            profilePicture:user.profilePicture
+            profilePicture:user.profilePicture,
+            Post:populatedPost
           },
           token: token,
         });
@@ -379,7 +393,8 @@ exports.Login = async (req, res) => {
           _id: user._id,
           Username: user.Username,
           email: user.email,
-          profilePicture:user.profilePicture
+          profilePicture:user.profilePicture,
+          Post:populatedPost
         },
         token: user.activeToken,  
       });
@@ -392,7 +407,8 @@ exports.Login = async (req, res) => {
           _id: user._id,
           Username: user.Username,
           email: user.email,
-          profilePicture:user.profilePicture
+          profilePicture:user.profilePicture,
+          Post:populatedPost
         },
         token: token,
       });

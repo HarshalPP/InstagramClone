@@ -1,5 +1,6 @@
 const Conversation = require("../models/converstion")
 const Message = require("../models/message")
+const {getReceiverSocketId}= require("../Socket/socket")
 
 
 exports.SendMessage = async(req,res)=>{
@@ -46,6 +47,10 @@ exports.SendMessage = async(req,res)=>{
             newMessage.save()
         ])
 
+        const getReceiverSocketIds = getReceiverSocketId(receiverId)
+        if(getReceiverSocketIds){
+            io.to(getReceiverSocketIds).emit('newMessage' , newMessage)
+        }
 
         // Implement the Socket //
 
@@ -79,6 +84,7 @@ exports.getMessage = async(req,res)=>{
                 ]   
             }
         })
+        .populate('message')
 
         if(!converstion){
             return res.status(200).json({

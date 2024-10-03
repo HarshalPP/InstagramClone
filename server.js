@@ -4,7 +4,8 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser');
 const {ConnectDb}=require("./config/dbconfig")
 const Router = require("./router")
-const app = express();
+// const app = express();
+const {app,server}= require("./Socket/socket")
 
 
 dotenv.config();
@@ -31,7 +32,7 @@ const PORT=process.env.PORT
 ConnectDb()
 .then(()=>{
 
-    app.listen(PORT,()=>{
+    server.listen(PORT,()=>{
         console.log(`Server is Running On ${PORT}`)
     })
 })

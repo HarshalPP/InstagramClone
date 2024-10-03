@@ -6,6 +6,8 @@ const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 dotenv.config();
 
+
+const { getReceiverSocketId,io } = require("../Socket/socket")
 // Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -167,15 +169,39 @@ exports.LikePost = async (req, res) => {
       { $addToSet: { likes: UserId } } // Add the UserId to likes array
     );
 
+    // Implement the socket connection //
 
-    res.status(200).json({
+    const user = await User.findById(UserId).select('Username profilePicture')
+    const PostownerId = FindPost.author.toString()
+    if (PostownerId !== UserId) {
+
+      const notification = {
+        type: 'like',
+        userId: UserId,
+        userDetails: user,
+        PostId,
+        message: 'Your post was Liked'
+
+      }
+
+      // get UserSocketId //
+
+      const postOwnerSocketId = getReceiverSocketId(PostownerId)
+      io.to(postOwnerSocketId).emit('notification', notification)
+
+    }
+
+
+
+
+    return res.status(200).json({
       success: true,
       message: 'Liked on Post',
       data: LikedPost
     });
 
   } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
 
@@ -197,10 +223,31 @@ exports.DisLike = async (req, res) => {
       { $pull: { likes: UserId } } // Remove UserId from likes array
     );
 
-    return res.status(200).json({
-      success: true,
-      message: 'Disliked the Post',
-      data: Dislike_Post
+        // Implement the socket connection //
+
+        const user = await User.findById(UserId).select('Username profilePicture')
+        const PostownerId = FindPost.author.toString()
+        if (PostownerId !== UserId) {
+    
+          const notification = {
+            type: 'Dislike',
+            userId: UserId,
+            userDetails: user,
+            PostId,
+            message: 'Your post was Disliked'
+    
+          }
+    
+          // get UserSocketId //
+          const postOwnerSocketId = getReceiverSocketId(PostownerId)
+          io.to(postOwnerSocketId).emit('notification', notification)
+    
+        }
+
+        return res.status(200).json({
+        success: true,
+        message: 'Disliked the Post',
+        data: Dislike_Post
     });
   } catch (error) {
     return res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -221,7 +268,7 @@ exports.AddComment = async (req, res) => {
     const addComment = new Comment({
       text,
       author: authorId,
-      post:PostId
+      post: PostId
     })
 
     const PostComment = await addComment.save();
@@ -254,24 +301,24 @@ exports.AddComment = async (req, res) => {
 
 // GET THE POSTED Comment //
 
-exports.getCommentofPost = async(req,res)=>{
-  try{
-  const PostId = req.params.id
-  const comments = await Comment.find({post:PostId})
-  .populate('author' , 'email profilePicture')
-  if(!comments){
-    return res.status(404).json({
-      message:'Comment not found oh this post'
+exports.getCommentofPost = async (req, res) => {
+  try {
+    const PostId = req.params.id
+    const comments = await Comment.find({ post: PostId })
+      .populate('author', 'email profilePicture')
+    if (!comments) {
+      return res.status(404).json({
+        message: 'Comment not found oh this post'
+      })
+    }
+    return res.status(200).json({
+      success: true,
+      message: 'Comment retrived successfully',
+      data: comments
     })
   }
-  return res.status(200).json({
-    success:true,
-    message:'Comment retrived successfully',
-    data:comments
-  })
-  }
-  catch(error){
-   return res.status(500).json('Internal server error')
+  catch (error) {
+    return res.status(500).json('Internal server error')
   }
 }
 
@@ -333,19 +380,19 @@ exports.Bookmark = async (req, res) => {
 
     // Find the user
     const Userdata = await User.findById(UserId);
-    
+
     // Check if the post is already bookmarked
     if (Userdata.bookmarks.includes(PostId)) {
       // Remove bookmark
       await User.updateOne(
-        { _id: UserId }, 
+        { _id: UserId },
         { $pull: { bookmarks: PostId } }
       );
       return res.status(200).json({ message: 'Post removed from bookmarks' });
     } else {
       // Add bookmark
       await User.updateOne(
-        { _id: UserId }, 
+        { _id: UserId },
         { $addToSet: { bookmarks: PostId } }
       );
       return res.status(200).json({ message: 'Post added to bookmarks' });
