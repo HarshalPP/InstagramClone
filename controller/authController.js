@@ -31,7 +31,7 @@ cloudinary.config({
 //   Register the Users //
 exports.Register = async (req, res) => {
     try {
-        const { firstName, lastName, email, password, bio , gender} = req.body;
+        const { Username, email, password, bio , gender} = req.body;
         const profilePicture = req.file;
 
         let cloudResponse;
@@ -52,10 +52,11 @@ exports.Register = async (req, res) => {
             });
         }
 
+        
+
         // Create a new user instance
         const Signup = new User({
-            firstName,
-            lastName,
+            Username,
             email,
             password,
             profilePicture:cloudResponse.secure_url,
@@ -321,6 +322,9 @@ exports.Login = async (req, res) => {
       return res.status(404).json({ message: 'Email not found.' });
     }
 
+
+    // const populatedPost = 
+
     // Function to generate and update active token
     const generateAndUpdateToken = async () => {
       const token = user.getSignedToken(); // Generate new token
@@ -513,7 +517,6 @@ exports.GetUsers = async (req, res) => {
     }
   };
   
-
              // Password setup //
 
 exports.passwordSetup = async (req, res) => {
@@ -554,7 +557,6 @@ exports.passwordSetup = async (req, res) => {
   };
 
 
-
   // Edit the Profile //
 
   exports.editProfile = async (req, res) => {
@@ -586,14 +588,14 @@ exports.passwordSetup = async (req, res) => {
   
       await user.save();
   
-      res.status(200).json({
+      return res.status(200).json({
         message: 'Profile updated successfully',
         success: true,
         user,
       });
     } catch (error) {
       console.error('Error:', error);
-      res.status(500).json({
+      return res.status(500).json({
         message: 'Internal server error',
         success: false,
         error: error.message,
@@ -612,17 +614,17 @@ exports.passwordSetup = async (req, res) => {
        .select("-password")
 
        if(!findUser){
-        res.status(400).json('No User is Found')
+        return res.status(400).json('No User is Found')
        }
 
-       res.status(200).json({
+       return res.status(200).json({
         success:true,
         Users:findUser
 
        })
     }
     catch(error){
-    res.status(500).json('Internal Server Error')
+    return res.status(500).json('Internal Server Error')
     }
   }
 

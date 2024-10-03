@@ -126,7 +126,7 @@ exports.postUser = async (req, res) => {
 
       .populate({
         path: 'author',
-        select: 'Username  email'
+        select: 'Username email'
       })
 
     if (!findPost) {
