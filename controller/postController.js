@@ -87,7 +87,7 @@ exports.getPost = async (req, res) => {
 
       .populate({
         path: 'author',
-        select: 'profilePicture'
+        select: 'profilePicture Username'
       })
 
       .populate({

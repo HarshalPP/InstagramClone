@@ -52,7 +52,7 @@ exports.Register = async (req, res) => {
             });
         }
 
-        
+
 
         // Create a new user instance
         const Signup = new User({
@@ -76,9 +76,9 @@ exports.Register = async (req, res) => {
           // Store token expiration date in the user object
           Result.tokenExpiry = expirationData;
           // Trigger notification via Pusher (optional: send to a specific admin or channel)
-          pusher.trigger('user-channel', 'user-registered', {
-            message: `A new user named ${Result.firstName} ${Result.lastName} has registered with the role of ${Result.role}`,
-        });
+          // pusher.trigger('user-channel', 'user-registered', {
+          //   message: `A new user named ${Result.firstName} ${Result.lastName} has registered with the role of ${Result.role}`,
+        // });
 
         // Generate and send token (assuming sendToken sends the response)
         sendToken(Result, 201, res);
