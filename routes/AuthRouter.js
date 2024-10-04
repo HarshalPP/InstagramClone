@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer');
-const {Register,Login ,logout, verifytoken,GetUsers,bulkCreateUsers , passwordSetup , editProfile , getsuggestedUsers ,followersOrUnfollow } = require("../controller/authController")
+const {Register,Login ,logout, verifytoken,GetUsers,bulkCreateUsers , passwordSetup , editProfile , getsuggestedUsers ,followersOrUnfollow , AggreateTh } = require("../controller/authController")
 const {isAuthenticated} = require("../middleware/AuthticationMiddleware")
 
 const storage = multer.memoryStorage();
@@ -33,6 +33,11 @@ router.get("/get",GetUsers)
 router.put("/edit-profile/:id", NewUploader.single('profilePicture') , editProfile)
 router.get("/SuggestedUsers" , isAuthenticated , getsuggestedUsers)
 router.post("/followAndUnfollow/:id" , isAuthenticated , followersOrUnfollow)
+
+
+// Pratice Purpose //
+
+router.get("/getAgg" , AggreateTh)
 
 
 

@@ -706,6 +706,35 @@ exports.passwordSetup = async (req, res) => {
   
 
   
+
+  // Array Districte Practice //
+
+  exports.AggreateTh = async(req,res)=>{
+    try {
+
+       const Aggreates = await User.aggregate([
+        {
+            $lookup:{
+              from:'posts',
+              localField:'_id',
+              foreignField:'author',
+              as:'PostUsers'
+            },
+
+
+        }
+       ])
+
+       return res.status(200).json({
+        message:'Reterived Post data',
+        data:Aggreates
+       })
+ 
+      
+    } catch (error) {
+      return res.status(500).json('Internal Server Error')
+    }
+  }
   
 
 

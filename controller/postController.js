@@ -306,7 +306,7 @@ exports.getCommentofPost = async (req, res) => {
   try {
     const PostId = req.params.id
     const comments = await Comment.find({ post: PostId })
-      .populate('author', 'email profilePicture')
+      .populate('author', 'email  profilePicture Username')
     if (!comments) {
       return res.status(404).json({
         message: 'Comment not found oh this post'
@@ -403,3 +403,23 @@ exports.Bookmark = async (req, res) => {
   }
 };
 
+
+
+
+// Make a api to Liked the Comment //
+
+// exports.Liked_Comment = async(req,res)=>{
+//   try {
+//     const UserId = req.user._id;
+//     const PostId = req.params.id;
+
+//     const FindPost = await Post.findOne({_id:PostId})
+//     if(!FindPost){
+//       return res.status(400).json('No Post Find to comment')
+//     }
+//     return res.status(200).json({msg:'True', data:FindPost})
+//   } 
+//   catch (error) {
+//     return res.status(500).json('internal Server Error' , error.message)
+//   }
+// }

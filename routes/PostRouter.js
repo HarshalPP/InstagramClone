@@ -4,7 +4,7 @@ const multer = require('multer')
 const storage = multer.memoryStorage();
 
 
-const{AddNewPost ,getPost , postUser , LikePost , DisLike , AddComment , getCommentofPost ,deletePost , Bookmark} = require("../controller/postController")
+const{AddNewPost ,getPost , postUser , LikePost , DisLike , AddComment , getCommentofPost ,deletePost , Bookmark , Liked_Comment} = require("../controller/postController")
 
 
 const{isAuthenticated} = require("../middleware/AuthticationMiddleware")
@@ -23,6 +23,7 @@ router.post("/AddComment/:id" , isAuthenticated , AddComment)
 router.get("/getCommentofPost/:id" , isAuthenticated , getCommentofPost)
 router.delete("/deletePost/:id" , isAuthenticated ,  deletePost)
 router.post("/BookMark/:id" , isAuthenticated ,  Bookmark)
+// router.get("/LikedComment/:id" , Liked_Comment)
 
 
 module.exports = router;
