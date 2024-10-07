@@ -307,6 +307,7 @@ exports.getCommentofPost = async (req, res) => {
     const PostId = req.params.id
     const comments = await Comment.find({ post: PostId })
       .populate('author', 'email  profilePicture Username')
+      .populate('liked' , 'Username')
     if (!comments) {
       return res.status(404).json({
         message: 'Comment not found oh this post'
@@ -365,7 +366,6 @@ exports.deletePost = async (req, res) => {
   }
 };
 
-
 // Bookmark the Post //
 
 exports.Bookmark = async (req, res) => {
@@ -408,18 +408,48 @@ exports.Bookmark = async (req, res) => {
 
 // Make a api to Liked the Comment //
 
-// exports.Liked_Comment = async(req,res)=>{
-//   try {
-//     const UserId = req.user._id;
-//     const PostId = req.params.id;
+exports.Liked_Comment = async (req, res) => {
+  try {
+    const UserId = req.user._id;        // Authenticated user ID
+    const PostId = req.params.PostId;   // Post ID from URL parameters
+    const CommentId = req.params.CommentId; // Comment ID from URL parameters
 
-//     const FindPost = await Post.findOne({_id:PostId})
-//     if(!FindPost){
-//       return res.status(400).json('No Post Find to comment')
-//     }
-//     return res.status(200).json({msg:'True', data:FindPost})
-//   } 
-//   catch (error) {
-//     return res.status(500).json('internal Server Error' , error.message)
-//   }
-// }
+    // Step 1: Find the post by ID and populate the 'comments' field
+    const FindPost = await Post.findById(PostId).populate({
+      path: 'comments',
+      select: 'text liked author'        // Selecting necessary fields from comments
+    });
+
+    if (!FindPost) {
+      return res.status(404).json({ msg: 'No Post found to comment on' }); // 404 for post not found
+    }
+
+    // Step 2: Find the comment by CommentId
+    const findComment = await Comment.findById(CommentId);
+
+
+    if (!findComment) {
+      return res.status(404).json({ msg: 'Comment not found' }); // 404 for comment not found
+    }
+
+    // Step 3: Check if the comment is already liked by the user
+    if (findComment.liked.includes(UserId)) {
+      // If the user has already liked the comment, remove the like (unlike)
+      await Comment.updateOne(
+        { _id: CommentId },
+        { $pull: { liked: UserId } }
+      );
+      return res.status(200).json({ msg: 'Unliked the comment' });
+    } else {
+      // If the user hasn't liked the comment yet, add the like
+      await Comment.updateOne(
+        { _id: CommentId },
+        { $push: { liked: UserId } }
+      );
+      return res.status(200).json({ msg: 'Liked the comment'  });
+    }
+  } catch (error) {
+    // Return a detailed error message
+    return res.status(500).json({ msg: 'Internal Server Error', error: error.message });
+  }
+};

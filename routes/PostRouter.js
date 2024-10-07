@@ -23,7 +23,7 @@ router.post("/AddComment/:id" , isAuthenticated , AddComment)
 router.get("/getCommentofPost/:id" , isAuthenticated , getCommentofPost)
 router.delete("/deletePost/:id" , isAuthenticated ,  deletePost)
 router.post("/BookMark/:id" , isAuthenticated ,  Bookmark)
-// router.get("/LikedComment/:id" , Liked_Comment)
+router.put("/LikedComment/:PostId/:CommentId" , isAuthenticated ,  Liked_Comment)
 
 
 module.exports = router;
