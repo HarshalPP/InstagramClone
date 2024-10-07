@@ -94,7 +94,7 @@ exports.getPost = async (req, res) => {
 
       .populate({
         path: 'comments',
-        select: 'text',
+        select: 'text liked ',
         sort: { createdAt: -1 },
         populate: {
           path: 'author',
@@ -419,6 +419,7 @@ exports.Liked_Comment = async (req, res) => {
       path: 'comments',
       select: 'text liked author'        // Selecting necessary fields from comments
     });
+
 
     if (!FindPost) {
       return res.status(404).json({ msg: 'No Post found to comment on' }); // 404 for post not found
