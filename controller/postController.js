@@ -448,7 +448,12 @@ exports.Liked_Comment = async (req, res) => {
         { $set: { Count: newCount } }
       );
 
-      return res.status(200).json({ msg: 'Unliked the comment', Count: newCount });
+      return res.status(200).json({
+        msg: 'Unliked the comment',
+        Count: newCount,
+        likeCount: updatedComment.liked.length, // Total number of likes
+        likedUsers: updatedComment.liked        // List of users who liked the comment
+      });
     } else {
       // If the user hasn't liked the comment yet, add the like
       await Comment.updateOne(
@@ -462,7 +467,14 @@ exports.Liked_Comment = async (req, res) => {
         { $set: { Count: 'True' } }
       );
 
-      return res.status(200).json({ msg: 'Liked the comment', Count: 'True' });
+      const updatedComment = await Comment.findById(CommentId);
+
+      return res.status(200).json({
+        msg: 'Liked the comment',
+        Count: 'True',
+        likeCount: updatedComment.liked.length, // Total number of likes
+        likedUsers: updatedComment.liked        // List of users who liked the comment
+      });
     }
 
   } catch (error) {
