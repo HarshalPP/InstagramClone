@@ -420,14 +420,12 @@ exports.Liked_Comment = async (req, res) => {
       select: 'text liked author'        // Selecting necessary fields from comments
     });
 
-
     if (!FindPost) {
       return res.status(404).json({ msg: 'No Post found to comment on' }); // 404 for post not found
     }
 
     // Step 2: Find the comment by CommentId
     const findComment = await Comment.findById(CommentId);
-
 
     if (!findComment) {
       return res.status(404).json({ msg: 'Comment not found' }); // 404 for comment not found
@@ -438,19 +436,38 @@ exports.Liked_Comment = async (req, res) => {
       // If the user has already liked the comment, remove the like (unlike)
       await Comment.updateOne(
         { _id: CommentId },
-        { $pull: { liked: UserId } }
+        { $pull: { liked: UserId } } // Use $pull to remove the user's like
       );
-      return res.status(200).json({ msg: 'Unliked the comment' });
+
+      // Update Count if likes are now empty
+      const updatedComment = await Comment.findById(CommentId);
+      const newCount = updatedComment.liked.length === 0 ? 'False' : 'True';
+
+      await Comment.updateOne(
+        { _id: CommentId },
+        { $set: { Count: newCount } }
+      );
+
+      return res.status(200).json({ msg: 'Unliked the comment', Count: newCount });
     } else {
       // If the user hasn't liked the comment yet, add the like
       await Comment.updateOne(
         { _id: CommentId },
-        { $push: { liked: UserId } }
+        { $addToSet: { liked: UserId } } // Use $addToSet to add the user's like
       );
-      return res.status(200).json({ msg: 'Liked the comment'  });
+
+      // Update Count to 'True' since there is at least one like now
+      await Comment.updateOne(
+        { _id: CommentId },
+        { $set: { Count: 'True' } }
+      );
+
+      return res.status(200).json({ msg: 'Liked the comment', Count: 'True' });
     }
+
   } catch (error) {
     // Return a detailed error message
     return res.status(500).json({ msg: 'Internal Server Error', error: error.message });
   }
 };
+

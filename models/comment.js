@@ -21,7 +21,13 @@ const commentSchema = new mongoose.Schema({
     liked:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
-    }]
+    }],
+    
+    Count:{
+        type:String,
+        enum:['True','False'],
+        default:'False'
+    }
 },
 {
     timestamps:true
