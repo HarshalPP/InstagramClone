@@ -737,7 +737,33 @@ exports.passwordSetup = async (req, res) => {
   }
   
 
+// Get User Profile by Id //
 
+exports.GetProfile = async(req,res)=>{
+  try{
+   const UserId = req.params.id
+    const GetUser = await User.findById(UserId)
+    .populate('followers')
+    .populate('following')
+    .populate('posts')
+    .populate('bookmarks')
+    if(!GetUser){
+      return res.status(404).json('User not Found')
+    }
+
+    return res.status(200).json({
+      Success:true,
+      data:GetUser
+    })
+
+
+  }catch(error){
+    return res.status(500).json({
+      message:'Internal server error',
+      error:error.message
+    })
+  }
+}
 
 
 
