@@ -13,8 +13,9 @@ const io = new Server(server, {
     }
 });
 
-const userSocketMap = {}; // This map stores socket ID corresponding to the user ID; userId -> socketId
+const userSocketMap = {}; 
 
+// This map stores socket ID corresponding to the user ID; userId -> socketId //
 
 exports.getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
 
@@ -25,6 +26,32 @@ io.on('connection', (socket) => {
     }
 
     io.emit('getOnlineUsers', Object.keys(userSocketMap));
+
+    // Handle the Video call //
+
+    socket.on('callUser' , ({fromUserId , toUserId , roomId})=>{
+        const ReceiverSocketId = userSocketMap[toUserId]
+        if(ReceiverSocketId){
+            io.to(ReceiverSocketId).emit('incomingCall',{
+                fromUserId,
+                roomId
+            })
+        }
+    })
+
+       // Handle the event when User2 accepts the call
+       socket.on('acceptCall', ({ fromUserId, toUserId, roomId }) => {
+        const callerSocketId = userSocketMap[fromUserId];
+
+        if (callerSocketId) {
+            // Notify the caller that the call has been accepted
+            io.to(callerSocketId).emit('callAccepted', {
+                fromUserId,
+                toUserId,
+                roomId,
+            });
+        }
+    });
 
     socket.on('disconnect', () => {
         if (userId) {

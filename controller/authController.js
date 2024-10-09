@@ -41,6 +41,8 @@ exports.Register = async (req, res) => {
           cloudResponse = await cloudinary.uploader.upload(fileUri); // Corrected Cloudinary upload
         }
 
+        
+
         if(!cloudResponse){
          res.status(404).json('Please Upload the Profile Image')
         }
@@ -620,6 +622,7 @@ exports.passwordSetup = async (req, res) => {
   };
 
 
+  
   exports.getsuggestedUsers = async(req,res)=>{
     try{
        const findUser = await User.find({_id:{
@@ -704,9 +707,6 @@ exports.passwordSetup = async (req, res) => {
     }
   };
   
-
-  
-
   // Array Districte Practice //
 
   exports.AggreateTh = async(req,res)=>{
