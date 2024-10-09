@@ -3,69 +3,64 @@ const Message = require("../models/message")
 const {getReceiverSocketId}= require("../Socket/socket")
 
 
-exports.SendMessage = async(req,res)=>{
+exports.SendMessage = async(req, res) => {
     try {
-
         const senderId = req.user._id;
-        const receiverId = req.params.id
-        const {message} =  req.body;
+        const receiverId = req.params.id;
+        const { message } = req.body;
 
-        // find the ids from converstion
-
-        let converstion = await Conversation.findOne({
-            participants:{
-            $all:[
-                senderId,
-                receiverId
-            ]
+        // find the conversation between sender and receiver
+        let conversation = await Conversation.findOne({
+            participants: {
+                $all: [senderId, receiverId]
             }
-        })
+        });
 
-        if(!converstion){
-            converstion = await Conversation.create({
-                senderId,
-                receiverId,
-                message
-            })
+        // if no conversation exists, create one without the message
+        if (!conversation) {
+            conversation = await Conversation.create({
+                participants: [senderId, receiverId],
+                message: [] // Initialize with an empty array for message IDs
+            });
         }
 
-        // create the msg //
-
+        // create the new message
         const newMessage = await Message.create({
             senderId,
             receiverId,
             message
-        })
+        });
 
-
-        if(newMessage){
-         converstion.message.push(newMessage._id)
+        // add the new message's ID to the conversation
+        if (newMessage) {
+            conversation.message.push(newMessage._id); // push the message's ObjectId
         }
 
         await Promise.all([
-            converstion.save(),
+            conversation.save(),
             newMessage.save()
-        ])
+        ]);
 
-        const getReceiverSocketIds = getReceiverSocketId(receiverId)
-        if(getReceiverSocketIds){
-            io.to(getReceiverSocketIds).emit('newMessage' , newMessage)
+        // Notify receiver via socket (if connected)
+        const getReceiverSocketIds = getReceiverSocketId(receiverId);
+        if (getReceiverSocketIds) {
+            io.to(getReceiverSocketIds).emit('newMessage', newMessage);
         }
 
-        // Implement the Socket //
-
+        // Send response
         return res.status(201).json({
-            success:true,
+            success: true,
             newMessage
-        })
+        });
 
-
-
-    } 
-    catch (error) {
-        res.status(500).json({msg: 'internal Server Error' , error:error.message})
+    } catch (error) {
+        res.status(500).json({
+            msg: 'internal Server Error',
+            error: error.message
+        });
     }
-}
+};
+
 
 
 // Get Message //
