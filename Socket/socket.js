@@ -61,4 +61,7 @@ io.on('connection', (socket) => {
     });
 });
 
+
+console.log("UserSocketMap" ,userSocketMap )
+
 module.exports = { app, server, io };
