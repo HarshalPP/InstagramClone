@@ -186,9 +186,9 @@ exports.LikePost = async (req, res) => {
 
       // get UserSocketId //
 
-      // const postOwnerSocketId = getReceiverSocketId(PostownerId)
-      // console.log(postOwnerSocketId , "postOwnerSocketId")
-      // io.to(postOwnerSocketId).emit('notification', notification)
+      const postOwnerSocketId = getReceiverSocketId(PostownerId)
+      console.log(postOwnerSocketId , "postOwnerSocketId")
+      io.to(postOwnerSocketId).emit('notification', notification)
 
     }
 
@@ -240,8 +240,8 @@ exports.DisLike = async (req, res) => {
           }
     
           // // get UserSocketId //
-          // const postOwnerSocketId = getReceiverSocketId(PostownerId)
-          // io.to(postOwnerSocketId).emit('notification', notification)
+          const postOwnerSocketId = getReceiverSocketId(PostownerId)
+          io.to(postOwnerSocketId).emit('notification', notification)
     
         }
 
