@@ -63,7 +63,7 @@ exports.SendMessage = async(req,res)=>{
 
     } 
     catch (error) {
-        res.status(500).json('internal Server Error')
+        res.status(500).json({msg: 'internal Server Error' , error:error.message})
     }
 }
 
