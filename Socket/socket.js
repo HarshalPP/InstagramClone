@@ -8,7 +8,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://instagram-clone-cyan-five.vercel.app ',
+        origin: 'https://instagram-clone-cyan-five.vercel.app',
         methods: ['GET', 'POST']
     }
 });
@@ -21,6 +21,7 @@ exports.getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
 
 io.on('connection', (socket) => {
     const userId = socket.handshake.query.userId;
+    console.log(userId, "UserId")
     if (userId) {
         userSocketMap[userId] = socket.id;
     }
