@@ -7,7 +7,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://instagram-clone-cyan-five.vercel.app',
+        origin: 'https://vercel.live/link/instagram-clone-cyan-five.vercel.app/',
         methods: ['GET', 'POST']
     }
 });
@@ -15,19 +15,19 @@ const io = new Server(server, {
 const userSocketMap = {}; 
 console.log("Initial UserSocketMap:", userSocketMap);
 
-// Function to get receiver's socket ID
-const getReceiverSocketId = (receiverId) => {
-    console.log(receiverId , "receiverId")
-    console.log(userSocketMap ,"new")
-    const socketId = userSocketMap[receiverId];
-    console.log(`Socket ID: ${socketId}`); // Console log for debugging
-    return socketId;
-};
+
+
 
 
 // Handle socket connection
 io.on('connection', (socket) => {
     const userId = socket.handshake.query.userId;
+if (userId) {
+    userSocketMap[userId] = socket.id;
+    console.log(`User connected: ${userId} with socket ID: ${socket.id}`);
+} else {
+    console.error('User ID not provided in the connection query.');
+}
 
     if (userId) {
         // Add the user to the userSocketMap
@@ -76,5 +76,24 @@ io.on('connection', (socket) => {
         io.emit('getOnlineUsers', Object.keys(userSocketMap));
     });
 });
+
+
+// Function to get receiver's socket ID
+const getReceiverSocketId = (receiverId) => {
+    console.log(receiverId, "receiverId");
+    console.log(userSocketMap, "userSocketMap");
+
+    const socketId = Object.keys(userSocketMap).find((key) => key === receiverId) ? userSocketMap[receiverId] : undefined;
+    
+    if (!socketId) {
+        console.error(`Socket ID for receiver ${receiverId} not found in userSocketMap.`);
+    } else {
+        console.log(`Found Socket ID for receiver ${receiverId}: ${socketId}`);
+    }
+
+    return socketId;
+};
+
+
 
 module.exports = { app, server, io , getReceiverSocketId};

@@ -1,6 +1,6 @@
 const Conversation = require("../models/converstion")
 const Message = require("../models/message")
-const {getReceiverSocketId}= require("../Socket/socket")
+const {getReceiverSocketId,io}= require("../Socket/socket")
 
 
 exports.SendMessage = async(req, res) => {
@@ -44,6 +44,7 @@ exports.SendMessage = async(req, res) => {
         // Notify receiver via socket (if connected)
         const getReceiverSocketIds = getReceiverSocketId(receiverId);
         if (getReceiverSocketIds) {
+            console.log("new data is " , getReceiverSocketIds)
             io.to(getReceiverSocketIds).emit('newMessage', newMessage);
         }
 
