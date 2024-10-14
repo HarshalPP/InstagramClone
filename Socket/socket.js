@@ -3,7 +3,6 @@ const express = require("express");
 const http = require("http");
 
 const app = express();
-
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -14,38 +13,51 @@ const io = new Server(server, {
 });
 
 const userSocketMap = {}; 
+console.log("Initial UserSocketMap:", userSocketMap);
 
-// This map stores socket ID corresponding to the user ID; userId -> socketId //
+// Function to get receiver's socket ID
+const getReceiverSocketId = (receiverId) => {
+    console.log(receiverId , "receiverId")
+    console.log(userSocketMap ,"new")
+    const socketId = userSocketMap[receiverId];
+    console.log(`Socket ID: ${socketId}`); // Console log for debugging
+    return socketId;
+};
 
-exports.getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
 
+// Handle socket connection
 io.on('connection', (socket) => {
     const userId = socket.handshake.query.userId;
-    console.log(userId, "UserId")
+
     if (userId) {
+        // Add the user to the userSocketMap
         userSocketMap[userId] = socket.id;
+        console.log(`User connected: ${userId} with socket ID: ${socket.id}`);
+        console.log("Updated UserSocketMap:", userSocketMap);
     }
 
+    // Emit the list of online users
     io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
-    // Handle the Video call //
-
-    socket.on('callUser' , ({fromUserId , toUserId , roomId})=>{
-        const ReceiverSocketId = userSocketMap[toUserId]
-        if(ReceiverSocketId){
-            io.to(ReceiverSocketId).emit('incomingCall',{
+    // Handle incoming video call from User1 to User2
+    socket.on('callUser', ({ fromUserId, toUserId, roomId }) => {
+        const receiverSocketId = userSocketMap[toUserId];
+        if (receiverSocketId) {
+            console.log(`Calling user: ${toUserId} from: ${fromUserId} in room: ${roomId}`);
+            io.to(receiverSocketId).emit('incomingCall', {
                 fromUserId,
                 roomId
-            })
+            });
+        } else {
+            console.log(`Receiver ${toUserId} not found in userSocketMap.`);
         }
-    })
+    });
 
-       // Handle the event when User2 accepts the call
-       socket.on('acceptCall', ({ fromUserId, toUserId, roomId }) => {
+    // Handle the event when User2 accepts the call
+    socket.on('acceptCall', ({ fromUserId, toUserId, roomId }) => {
         const callerSocketId = userSocketMap[fromUserId];
-
         if (callerSocketId) {
-            // Notify the caller that the call has been accepted
+            console.log(`User ${toUserId} accepted call from ${fromUserId}`);
             io.to(callerSocketId).emit('callAccepted', {
                 fromUserId,
                 toUserId,
@@ -54,15 +66,15 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Handle socket disconnection
     socket.on('disconnect', () => {
         if (userId) {
-            delete userSocketMap[userId];
+            console.log(`User disconnected: ${userId} with socket ID: ${socket.id}`);
+            delete userSocketMap[userId]; // Remove the user from the map
+            console.log("Updated UserSocketMap after disconnect:", userSocketMap);
         }
         io.emit('getOnlineUsers', Object.keys(userSocketMap));
     });
 });
 
-
-console.log("UserSocketMap" ,userSocketMap )
-
-module.exports = { app, server, io };
+module.exports = { app, server, io , getReceiverSocketId};
