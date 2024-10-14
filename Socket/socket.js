@@ -54,32 +54,32 @@ if (userId) {
     // Emit the list of online users
     io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
-    // Handle incoming video call from User1 to User2
-    socket.on('callUser', ({ fromUserId, toUserId, roomId }) => {
-        const receiverSocketId = userSocketMap[toUserId];
-        if (receiverSocketId) {
-            console.log(`Calling user: ${toUserId} from: ${fromUserId} in room: ${roomId}`);
-            io.to(receiverSocketId).emit('incomingCall', {
-                fromUserId,
-                roomId
-            });
-        } else {
-            console.log(`Receiver ${toUserId} not found in userSocketMap.`);
-        }
-    });
+    // // Handle incoming video call from User1 to User2
+    // socket.on('callUser', ({ fromUserId, toUserId, roomId }) => {
+    //     const receiverSocketId = userSocketMap[toUserId];
+    //     if (receiverSocketId) {
+    //         console.log(`Calling user: ${toUserId} from: ${fromUserId} in room: ${roomId}`);
+    //         io.to(receiverSocketId).emit('incomingCall', {
+    //             fromUserId,
+    //             roomId
+    //         });
+    //     } else {
+    //         console.log(`Receiver ${toUserId} not found in userSocketMap.`);
+    //     }
+    // });
 
-    // Handle the event when User2 accepts the call
-    socket.on('acceptCall', ({ fromUserId, toUserId, roomId }) => {
-        const callerSocketId = userSocketMap[fromUserId];
-        if (callerSocketId) {
-            console.log(`User ${toUserId} accepted call from ${fromUserId}`);
-            io.to(callerSocketId).emit('callAccepted', {
-                fromUserId,
-                toUserId,
-                roomId,
-            });
-        }
-    });
+    // // Handle the event when User2 accepts the call
+    // socket.on('acceptCall', ({ fromUserId, toUserId, roomId }) => {
+    //     const callerSocketId = userSocketMap[fromUserId];
+    //     if (callerSocketId) {
+    //         console.log(`User ${toUserId} accepted call from ${fromUserId}`);
+    //         io.to(callerSocketId).emit('callAccepted', {
+    //             fromUserId,
+    //             toUserId,
+    //             roomId,
+    //         });
+    //     }
+    // });
 
     // Handle socket disconnection
     socket.on('disconnect', () => {
