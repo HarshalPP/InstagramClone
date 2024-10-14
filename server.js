@@ -14,7 +14,7 @@ dotenv.config();
 // To handle CORS //
 // Update CORS options to allow specific origin
 app.use(cors({
-    origin: 'http://localhost:4000', // Your frontend origin
+    origin: 'https://zippy-cascaron-626fb8.netlify.app/', // Your frontend origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
     credentials: true, // To allow sending cookies or authentication tokens
 }));
