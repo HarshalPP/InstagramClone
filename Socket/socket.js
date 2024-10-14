@@ -7,7 +7,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: '*', // Allow all origins (for development only)
+        origin: 'https://zippy-cascaron-626fb8.netlify.app', // Set this to your frontend URL
         methods: ['GET', 'POST']
     }
 });
