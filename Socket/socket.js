@@ -7,7 +7,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://zippy-cascaron-626fb8.netlify.app/',
+        origin: 'https://instagram-clone-cyan-five.vercel.app/',
         methods: ['GET', 'POST']
     }
 });
