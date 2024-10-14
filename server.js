@@ -13,13 +13,13 @@ dotenv.config();
 
 // To handle CORS //
 // Update CORS options to allow specific origin
-// app.use(cors({
-//     origin: 'https://instagram-clone-cyan-five.vercel.app/', // Your frontend origin
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-//     credentials: true, // To allow sending cookies or authentication tokens
-// }));
+app.use(cors({
+    origin: 'https://instagram-clone-cyan-five.vercel.app/', // Your frontend origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+    credentials: true, // To allow sending cookies or authentication tokens
+}));
 
-app.use(cors())
+// app.use(cors())
 // Use the cookie-parser middleware
 app.use(cookieParser());
 
