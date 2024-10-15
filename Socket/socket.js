@@ -11,8 +11,8 @@ const io = new Server(server, {
             // List of allowed origins
             const allowedOrigins = [
                 'https://zippy-cascaron-626fb8.netlify.app', // Frontend URL
-                'https://instagram-clone-cyan-five.vercel.app', // Backend URL (if needed),
-                'http://localhost:5173/'
+                'https://instagram-clone-cyan-five.vercel.app' // Backend URL (if needed),
+
             ];
             
             // Check if the incoming origin is in the allowed origins list

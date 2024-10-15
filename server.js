@@ -13,23 +13,11 @@ dotenv.config();
 
 // To handle CORS //
 // Update CORS options to allow specific origin
-const allowedOrigins = [
-    'https://zippy-cascaron-626fb8.netlify.app/', // Your Netlify frontend origin
-    'http://localhost:5173/' // Your Vita React frontend origin
-];
-
 app.use(cors({
-    origin: function (origin, callback) {
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: 'https://zippy-cascaron-626fb8.netlify.app/', // Your frontend origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
     credentials: true, // To allow sending cookies or authentication tokens
 }));
-
 
 // app.use(cors())
 // Use the cookie-parser middleware
