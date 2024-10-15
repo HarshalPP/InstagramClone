@@ -5,36 +5,26 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app);
 
-// const io = new Server(server, {
-//     cors: {
-//         origin: (origin, callback) => {
-//             // List of allowed origins
-//             const allowedOrigins = [
-//                 'https://zippy-cascaron-626fb8.netlify.app', // Frontend URL
-//                 'https://instagram-clone-cyan-five.vercel.app' // Backend URL (if needed),
-
-//             ];
-            
-//             // Check if the incoming origin is in the allowed origins list
-//             if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-//                 callback(null, true); // Allow the request
-//             } else {
-//                 callback(new Error('Not allowed by CORS')); // Reject the request
-//             }
-//         },
-//         methods: ['GET', 'POST'],
-//         credentials: true // Allow credentials if needed
-//     }
-// });
-
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: (origin, callback) => {
+            // List of allowed origins
+            const allowedOrigins = [
+                'https://zippy-cascaron-626fb8.netlify.app', // Frontend URL
+
+            ];
+            
+            // Check if the incoming origin is in the allowed origins list
+            if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+                callback(null, true); // Allow the request
+            } else {
+                callback(new Error('Not allowed by CORS')); // Reject the request
+            }
+        },
         methods: ['GET', 'POST'],
         credentials: true // Allow credentials if needed
     }
 });
-
 
 
 const userSocketMap = {}; 
