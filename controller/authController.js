@@ -319,7 +319,9 @@ exports.Login = async (req, res) => {
 
   try {
     // Find the user by email
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email })
+    .populate('followers', '_id Username profilePicture') // populate followers
+    .populate('following', '_id Username profilePicture') // populate following
 
     if (!user) {
       return res.status(404).json({ message: 'Email not found.' });
@@ -358,7 +360,9 @@ exports.Login = async (req, res) => {
             _id: user._id,
             Username: user.Username,
             email: user.email,
-            profilePicture:user.profilePicture
+            profilePicture:user.profilePicture,
+            followers: user.followers, // populated followers
+            following: user.following, // populated following
             // Post:populatedPost
           },
           token: user.activeToken,

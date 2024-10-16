@@ -2,13 +2,39 @@ const Conversation = require("../models/converstion")
 const Message = require("../models/message")
 const User = require("../models/User")
 const { getReceiverSocketId, io } = require("../Socket/socket")
+const cloudinary = require('cloudinary').v2;
+const sharp = require("sharp");
 
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
+  });
 
 exports.SendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const receiverId = req.params.id;
         const { message } = req.body;
+        const images  = req.files; // Check if the image file exists
+
+         /// Optimize the image using sharp
+         let imageUrls = [];
+
+         // Loop through each image and optimize/upload to Cloudinary
+         for (const image of images) {
+             const optimizedImageBuffer = await sharp(image.buffer)
+                 .resize({ width: 800, height: 800, fit: 'inside' })
+                 .toFormat('jpeg', { quality: 80 })
+                 .toBuffer();
+ 
+             const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+             const cloudResponse = await cloudinary.uploader.upload(fileURI);
+ 
+             // Store each image URL
+             imageUrls.push(cloudResponse.secure_url);
+         }
+ 
 
         // find the conversation between sender and receiver
         let conversation = await Conversation.findOne({
@@ -29,7 +55,8 @@ exports.SendMessage = async (req, res) => {
         const newMessage = await Message.create({
             senderId,
             receiverId,
-            message
+            message,
+            image:imageUrls  // Save the array of image URLs
         });
 
         // add the new message's ID to the conversation
@@ -49,7 +76,7 @@ exports.SendMessage = async (req, res) => {
             io.to(getReceiverSocketIds).emit('newMessage', newMessage);
         }
 
-        /// Make  a Notification to show the Msg from User1 to User2
+        // Make  a Notification to show the Msg from User1 to User2
 
         const sender = await User.findById(senderId).select('Username profilePicture ')
         if (getReceiverSocketIds) {

@@ -14,7 +14,12 @@ const messageSchema = new mongoose.Schema({
     message:{
         type:String,
         required:true
-    }
+    },
+
+    image: {
+        type: [mongoose.Schema.Types.Mixed],  // Store images as an array
+        required: false
+    },
 
 })
 
