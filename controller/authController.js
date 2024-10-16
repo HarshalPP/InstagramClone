@@ -511,6 +511,11 @@ exports.GetUsers = async (req, res) => {
     try {
       // Fetch users and populate investments and company details within investments
       const findUsers = await User.find({})
+      .populate('followers')
+      .populate('following')
+      .populate('posts')
+      .populate('bookmarks')
+
 
       // Check if users were found
       if (!findUsers || findUsers.length === 0) {
