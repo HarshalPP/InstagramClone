@@ -376,7 +376,10 @@ exports.Login = async (req, res) => {
             _id: user._id,
             Username: user.Username,
             email: user.email,
-            profilePicture:user.profilePicture
+            profilePicture:user.profilePicture,
+            profilePicture:user.profilePicture,
+            followers: user.followers, // populated followers
+            following: user.following // populated following
             // Post:populatedPost
           },
           token: token,
@@ -399,7 +402,10 @@ exports.Login = async (req, res) => {
           _id: user._id,
           Username: user.Username,
           email: user.email,
-          profilePicture:user.profilePicture
+          profilePicture:user.profilePicture,
+          profilePicture:user.profilePicture,
+            followers: user.followers, // populated followers
+            following: user.following // populated following
           // Post:populatedPost
         },
         token: user.activeToken,  
@@ -413,7 +419,10 @@ exports.Login = async (req, res) => {
           _id: user._id,
           Username: user.Username,
           email: user.email,
-          profilePicture:user.profilePicture
+          profilePicture:user.profilePicture,
+          profilePicture:user.profilePicture,
+            followers: user.followers, // populated followers
+            following: user.following // populated following
           // Post:populatedPost
         },
         token: token,
