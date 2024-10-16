@@ -1,9 +1,9 @@
 const Conversation = require("../models/converstion")
 const Message = require("../models/message")
-const {getReceiverSocketId,io}= require("../Socket/socket")
+const { getReceiverSocketId, io } = require("../Socket/socket")
 
 
-exports.SendMessage = async(req, res) => {
+exports.SendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const receiverId = req.params.id;
@@ -44,9 +44,33 @@ exports.SendMessage = async(req, res) => {
         // Notify receiver via socket (if connected)
         const getReceiverSocketIds = getReceiverSocketId(receiverId);
         if (getReceiverSocketIds) {
-            console.log("new data is " , getReceiverSocketIds)
+            console.log("new data is ", getReceiverSocketIds)
             io.to(getReceiverSocketIds).emit('newMessage', newMessage);
         }
+
+        /// Make  a Notification to show the Msg from User1 to User2
+
+        const sender = await User.findById(senderId).select('Username profilePicture ')
+        if (getReceiverSocketIds) {
+
+            const notification = {
+                type: 'message',
+                senderId,
+                senderDetails: sender,
+                message,
+                messageId: newMessage._id,
+                notificationMessage: 'You have a new message',
+
+            }
+
+            // Emit Notification to Reciver (user2)
+
+            console.log(`Sending message notification to socket ID: ${getReceiverSocketIds}`);
+            io.to(getReceiverSocketIds).emit('messageNotification', notification)
+        }
+        else {
+            console.log('Receiver is not connected, no notification sent');
+          }
 
         // Send response
         return res.status(201).json({
@@ -67,33 +91,33 @@ exports.SendMessage = async(req, res) => {
 // Get Message //
 
 
-exports.getMessage = async(req,res)=>{
+exports.getMessage = async (req, res) => {
     try {
         const senderId = req.user._id
-        const receiverId=req.params.id;
+        const receiverId = req.params.id;
 
         const converstion = await Conversation.findOne({
-            participants:{
-                $all:[
+            participants: {
+                $all: [
                     senderId,
                     receiverId
-                ]   
+                ]
             }
         })
-        .populate('message')
+            .populate('message')
 
-        if(!converstion){
+        if (!converstion) {
             return res.status(200).json({
-                success:true,
-                message:[]
+                success: true,
+                message: []
             })
         }
 
         return res.status(200).json({
-            success:true,
-            message:converstion?.message
+            success: true,
+            message: converstion?.message
         })
-        
+
     } catch (error) {
         return res.status(500).json('Internal Server Error')
     }

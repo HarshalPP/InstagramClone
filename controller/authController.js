@@ -321,7 +321,6 @@ exports.Login = async (req, res) => {
     // Find the user by email
     const user = await User.findOne({ email: email });
 
-
     if (!user) {
       return res.status(404).json({ message: 'Email not found.' });
     }
@@ -512,11 +511,6 @@ exports.GetUsers = async (req, res) => {
     try {
       // Fetch users and populate investments and company details within investments
       const findUsers = await User.find({})
-      .populate('followers')
-      .populate('following')
-      .populate('posts')
-      .populate('bookmarks')
-
 
       // Check if users were found
       if (!findUsers || findUsers.length === 0) {
