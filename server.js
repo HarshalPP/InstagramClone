@@ -14,7 +14,7 @@ dotenv.config();
 // To handle CORS //
 // Update CORS options to allow specific origin
 app.use(cors({
-    origin: 'https://zippy-cascaron-626fb8.netlify.app', // Your frontend origin
+    origin: 'http://3.110.28.248/', // Your frontend origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
     credentials: true, // To allow sending cookies or authentication tokens
 }));

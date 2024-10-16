@@ -10,7 +10,7 @@ const io = new Server(server, {
         origin: (origin, callback) => {
             // List of allowed origins
             const allowedOrigins = [
-                'https://zippy-cascaron-626fb8.netlify.app', // Frontend URL
+                'http://3.110.28.248/', // Frontend URL
 
             ];
             
@@ -21,8 +21,7 @@ const io = new Server(server, {
                 callback(new Error('Not allowed by CORS')); // Reject the request
             }
         },
-        methods: ['GET', 'POST'],
-        credentials: true // Allow credentials if needed
+        methods: ['GET', 'POST']
     }
 });
 
