@@ -13,13 +13,13 @@ dotenv.config();
 
 // To handle CORS //
 // Update CORS options to allow specific origin
-app.use(cors({
-    origin: 'http://3.110.28.248', // Your frontend origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-    credentials: true, // To allow sending cookies or authentication tokens
-}));
+// app.use(cors({
+//     origin: 'http://3.110.28.248', // Your frontend origin
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+//     credentials: true, // To allow sending cookies or authentication tokens
+// }));
 
-// app.use(cors())
+app.use(cors())
 // Use the cookie-parser middleware
 app.use(cookieParser());
 
