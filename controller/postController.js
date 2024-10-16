@@ -7,7 +7,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 
-const { getReceiverSocketId,io } = require("../Socket/socket")
+const { getReceiverSocketId, io } = require("../Socket/socket")
 // Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -173,6 +173,7 @@ exports.LikePost = async (req, res) => {
 
     const user = await User.findById(UserId).select('Username profilePicture')
     const PostownerId = FindPost.author.toString()
+    console.log("PostownerId is not defined" , PostownerId)
     if (PostownerId !== UserId) {
 
       const notification = {
