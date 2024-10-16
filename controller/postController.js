@@ -190,13 +190,17 @@ exports.LikePost = async (req, res) => {
       const postOwnerSocketId = getReceiverSocketId(PostownerId)
       console.log(postOwnerSocketId , "postOwnerSocketId")
       if (postOwnerSocketId) {
-        console.log(`Emitting 'notification' event to socket ID: ${postOwnerSocketId}`);
-        io.emit('notification', postOwnerSocketId)
-        console.log(`'notification' event emitted successfully.`);
+        const socket = io.sockets.sockets.get(postOwnerSocketId); // Get the socket instance
+        if (socket) {
+          // Emit the notification directly using the socket instance
+          socket.emit('notification', notification);
+          console.log(`Notification emitted directly to socket ID: ${postOwnerSocketId}`);
+        } else {
+          console.log("Socket instance not found for the post owner. Unable to emit notification.");
+        }
       } else {
         console.log("No socket ID found for the post owner. Unable to emit notification.");
       }
-
     }
 
 
