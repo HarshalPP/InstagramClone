@@ -1,5 +1,6 @@
 const Conversation = require("../models/converstion")
 const Message = require("../models/message")
+const User = require("../models/User")
 const { getReceiverSocketId, io } = require("../Socket/socket")
 
 
