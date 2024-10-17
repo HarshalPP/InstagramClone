@@ -118,41 +118,42 @@ cloudinary.config({
 
 // Get Message //
 
-
 exports.SendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const receiverId = req.params.id;
         const { message } = req.body;
-        const mediaFiles = req.files; // Expecting both images and videos in req.files
+        const mediaFiles = req.files; // This is an object with arrays of files
 
         let imageUrls = [];
         let videoUrls = [];
 
-        // Loop through media files (images and videos)
-        for (const media of mediaFiles) {
-            if (media.mimetype.startsWith('image/')) {
-                // Optimize and upload image
-                const optimizedImageBuffer = await sharp(media.buffer)
-                    .resize({ width: 800, height: 800, fit: 'inside' })
-                    .toFormat('jpeg', { quality: 80 })
-                    .toBuffer();
+        // Check if image and video fields exist in req.files
+        const images = mediaFiles['image'] || [];
+        const videos = mediaFiles['video'] || [];
 
-                const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
-                const cloudResponse = await cloudinary.uploader.upload(fileURI);
+        // Loop through image files and process
+        for (const image of images) {
+            const optimizedImageBuffer = await sharp(image.buffer)
+                .resize({ width: 800, height: 800, fit: 'inside' })
+                .toFormat('jpeg', { quality: 80 })
+                .toBuffer();
 
-                // Store image URL
-                imageUrls.push(cloudResponse.secure_url);
+            const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+            const cloudResponse = await cloudinary.uploader.upload(fileURI);
 
-            } else if (media.mimetype.startsWith('video/')) {
-                // Upload video directly to Cloudinary (no resizing)
-                const cloudResponse = await cloudinary.uploader.upload(media.path, {
-                    resource_type: "video", // Specify video resource type
-                });
+            // Store image URL
+            imageUrls.push(cloudResponse.secure_url);
+        }
 
-                // Store video URL
-                videoUrls.push(cloudResponse.secure_url);
-            }
+        // Loop through video files and process
+        for (const video of videos) {
+            const cloudResponse = await cloudinary.uploader.upload(video.path, {
+                resource_type: "video", // Specify video resource type
+            });
+
+            // Store video URL
+            videoUrls.push(cloudResponse.secure_url);
         }
 
         // Find or create conversation between sender and receiver
@@ -220,6 +221,7 @@ exports.SendMessage = async (req, res) => {
         });
     }
 };
+
 
 
 exports.getMessage = async (req, res) => {
