@@ -10,7 +10,7 @@ const io = new Server(server, {
         origin: (origin, callback) => {
             // List of allowed origins
             const allowedOrigins = [
-                'http://3.109.153.20', // Frontend URL
+                'http://13.202.189.87', // Frontend URL
 
             ];
             
