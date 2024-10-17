@@ -11,39 +11,155 @@ cloudinary.config({
     api_secret: process.env.API_SECRET,
   });
 
+// exports.SendMessage = async (req, res) => {
+//     try {
+//         const senderId = req.user._id;
+//         const receiverId = req.params.id;
+//         const { message } = req.body;
+//         const images  = req.files; // Check if the image file exists
+
+//          /// Optimize the image using sharp
+//          let imageUrls = [];
+
+//          // Loop through each image and optimize/upload to Cloudinary
+//          for (const image of images) {
+//              const optimizedImageBuffer = await sharp(image.buffer)
+//                  .resize({ width: 800, height: 800, fit: 'inside' })
+//                  .toFormat('jpeg', { quality: 80 })
+//                  .toBuffer();
+ 
+//              const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+//              const cloudResponse = await cloudinary.uploader.upload(fileURI);
+ 
+//              // Store each image URL
+//              imageUrls.push(cloudResponse.secure_url);
+//          }
+ 
+
+//         // find the conversation between sender and receiver
+//         let conversation = await Conversation.findOne({
+//             participants: {
+//                 $all: [senderId, receiverId]
+//             }
+//         });
+
+//         // if no conversation exists, create one without the message
+//         if (!conversation) {
+//             conversation = await Conversation.create({
+//                 participants: [senderId, receiverId],
+//                 message: [] // Initialize with an empty array for message IDs
+//             });
+//         }
+
+//         // create the new message
+//         const newMessage = await Message.create({
+//             senderId,
+//             receiverId,
+//             message,
+//             image:imageUrls  // Save the array of image URLs
+//         });
+
+//         // add the new message's ID to the conversation
+//         if (newMessage) {
+//             conversation.message.push(newMessage._id); // push the message's ObjectId
+//         }
+
+//         await Promise.all([
+//             conversation.save(),
+//             newMessage.save()
+//         ]);
+
+//         // Notify receiver via socket (if connected)
+//         const getReceiverSocketIds = getReceiverSocketId(receiverId);
+//         if (getReceiverSocketIds) {
+//             console.log("new data is ", getReceiverSocketIds)
+//             io.to(getReceiverSocketIds).emit('newMessage', newMessage);
+//         }
+
+//         // Make  a Notification to show the Msg from User1 to User2
+
+//         const sender = await User.findById(senderId).select('Username profilePicture ')
+//         if (getReceiverSocketIds) {
+
+//             const notification = {
+//                 type: 'message',
+//                 senderId,
+//                 senderDetails: sender,
+//                 message,
+//                 messageId: newMessage._id,
+//                 notificationMessage: 'You have a new message',
+
+//             }
+
+//             // Emit Notification to Reciver (user2)
+
+//             console.log(`Sending message notification to socket ID: ${getReceiverSocketIds}`);
+//             io.to(getReceiverSocketIds).emit('messageNotification', notification)
+//         }
+//         else {
+//             console.log('Receiver is not connected, no notification sent');
+//           }
+
+//         // Send response
+//         return res.status(201).json({
+//             success: true,
+//             newMessage
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({
+//             msg: 'internal Server Error',
+//             error: error.message
+//         });
+//     }
+// };
+
+
+
+// Get Message //
+
+
 exports.SendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const receiverId = req.params.id;
         const { message } = req.body;
-        const images  = req.files; // Check if the image file exists
+        const mediaFiles = req.files; // Expecting both images and videos in req.files
 
-         /// Optimize the image using sharp
-         let imageUrls = [];
+        let imageUrls = [];
+        let videoUrls = [];
 
-         // Loop through each image and optimize/upload to Cloudinary
-         for (const image of images) {
-             const optimizedImageBuffer = await sharp(image.buffer)
-                 .resize({ width: 800, height: 800, fit: 'inside' })
-                 .toFormat('jpeg', { quality: 80 })
-                 .toBuffer();
- 
-             const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
-             const cloudResponse = await cloudinary.uploader.upload(fileURI);
- 
-             // Store each image URL
-             imageUrls.push(cloudResponse.secure_url);
-         }
- 
+        // Loop through media files (images and videos)
+        for (const media of mediaFiles) {
+            if (media.mimetype.startsWith('image/')) {
+                // Optimize and upload image
+                const optimizedImageBuffer = await sharp(media.buffer)
+                    .resize({ width: 800, height: 800, fit: 'inside' })
+                    .toFormat('jpeg', { quality: 80 })
+                    .toBuffer();
 
-        // find the conversation between sender and receiver
-        let conversation = await Conversation.findOne({
-            participants: {
-                $all: [senderId, receiverId]
+                const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+                const cloudResponse = await cloudinary.uploader.upload(fileURI);
+
+                // Store image URL
+                imageUrls.push(cloudResponse.secure_url);
+
+            } else if (media.mimetype.startsWith('video/')) {
+                // Upload video directly to Cloudinary (no resizing)
+                const cloudResponse = await cloudinary.uploader.upload(media.path, {
+                    resource_type: "video", // Specify video resource type
+                });
+
+                // Store video URL
+                videoUrls.push(cloudResponse.secure_url);
             }
+        }
+
+        // Find or create conversation between sender and receiver
+        let conversation = await Conversation.findOne({
+            participants: { $all: [senderId, receiverId] }
         });
 
-        // if no conversation exists, create one without the message
         if (!conversation) {
             conversation = await Conversation.create({
                 participants: [senderId, receiverId],
@@ -51,18 +167,17 @@ exports.SendMessage = async (req, res) => {
             });
         }
 
-        // create the new message
+        // Create the new message with both image and video URLs
         const newMessage = await Message.create({
             senderId,
             receiverId,
             message,
-            image:imageUrls  // Save the array of image URLs
+            image: imageUrls,  // Save array of image URLs
+            videos: videoUrls   // Save array of video URLs
         });
 
-        // add the new message's ID to the conversation
-        if (newMessage) {
-            conversation.message.push(newMessage._id); // push the message's ObjectId
-        }
+        // Add the new message's ID to the conversation
+        conversation.message.push(newMessage._id);
 
         await Promise.all([
             conversation.save(),
@@ -72,33 +187,25 @@ exports.SendMessage = async (req, res) => {
         // Notify receiver via socket (if connected)
         const getReceiverSocketIds = getReceiverSocketId(receiverId);
         if (getReceiverSocketIds) {
-            console.log("new data is ", getReceiverSocketIds)
             io.to(getReceiverSocketIds).emit('newMessage', newMessage);
         }
 
-        // Make  a Notification to show the Msg from User1 to User2
+        // Make a notification to show the message
+        const sender = await User.findById(senderId).select('Username profilePicture');
+        const notification = {
+            type: 'message',
+            senderId,
+            senderDetails: sender,
+            message,
+            messageId: newMessage._id,
+            notificationMessage: 'You have a new message',
+        };
 
-        const sender = await User.findById(senderId).select('Username profilePicture ')
         if (getReceiverSocketIds) {
-
-            const notification = {
-                type: 'message',
-                senderId,
-                senderDetails: sender,
-                message,
-                messageId: newMessage._id,
-                notificationMessage: 'You have a new message',
-
-            }
-
-            // Emit Notification to Reciver (user2)
-
-            console.log(`Sending message notification to socket ID: ${getReceiverSocketIds}`);
-            io.to(getReceiverSocketIds).emit('messageNotification', notification)
-        }
-        else {
+            io.to(getReceiverSocketIds).emit('messageNotification', notification);
+        } else {
             console.log('Receiver is not connected, no notification sent');
-          }
+        }
 
         // Send response
         return res.status(201).json({
@@ -108,15 +215,11 @@ exports.SendMessage = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({
-            msg: 'internal Server Error',
+            msg: 'Internal Server Error',
             error: error.message
         });
     }
 };
-
-
-
-// Get Message //
 
 
 exports.getMessage = async (req, res) => {

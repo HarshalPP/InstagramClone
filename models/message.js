@@ -20,6 +20,10 @@ const messageSchema = new mongoose.Schema({
         type: [mongoose.Schema.Types.Mixed],  // Store images as an array
         required: false
     },
+    videos:{
+        type: [mongoose.Schema.Types.Mixed],  // Store images as an array
+        required: false
+    }
 
 })
 

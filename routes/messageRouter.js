@@ -10,7 +10,11 @@ const Upload = multer({
     limits: { fileSize: 5000000 },  // Optional: Limit file size (example: 5MB)
   })
 
-router.post("/send/:id", Upload.array('image', 10) , isAuthenticated , SendMessage)
+  router.post("/send/:id", Upload.fields([
+    { name: 'image', maxCount: 10 },
+    { name: 'video', maxCount: 5 }
+]), isAuthenticated, SendMessage);
+
 router.get("/all/:id" , isAuthenticated , getMessage )
 
 
