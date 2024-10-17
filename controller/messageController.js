@@ -4,6 +4,9 @@ const User = require("../models/User")
 const { getReceiverSocketId, io } = require("../Socket/socket")
 const cloudinary = require('cloudinary').v2;
 const sharp = require("sharp");
+const fs = require('fs');
+const path = require('path');
+const os = require('os'); // To create a temporary directory
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -123,7 +126,8 @@ exports.SendMessage = async (req, res) => {
         const senderId = req.user._id;
         const receiverId = req.params.id;
         const { message } = req.body;
-        const mediaFiles = req.files; // This is an object with arrays of files
+        const mediaFiles = req.files;
+        
 
         let imageUrls = [];
         let videoUrls = [];
@@ -148,13 +152,26 @@ exports.SendMessage = async (req, res) => {
 
         // Loop through video files and process
         for (const video of videos) {
-            const cloudResponse = await cloudinary.uploader.upload(video.path, {
-                resource_type: "video", // Specify video resource type
+        
+            // Generate a temporary file path
+            const tempFilePath = path.join(os.tmpdir(), video.originalname);
+        
+            // Write the buffer to the temporary file
+            fs.writeFileSync(tempFilePath, video.buffer);
+        
+            // Upload the video file to Cloudinary
+            const cloudResponse = await cloudinary.uploader.upload(tempFilePath, {
+                resource_type: "video",   // Specify video resource type
+                format: "mp4"             // Force conversion to .mp4 format
             });
-
+        
             // Store video URL
             videoUrls.push(cloudResponse.secure_url);
+        
+            // Delete the temporary file after upload
+            fs.unlinkSync(tempFilePath);
         }
+        
 
         // Find or create conversation between sender and receiver
         let conversation = await Conversation.findOne({
@@ -254,4 +271,20 @@ exports.getMessage = async (req, res) => {
     } catch (error) {
         return res.status(500).json('Internal Server Error')
     }
+}
+
+
+
+exports.DeleteMessage = async(req,res)=>{
+
+    try{
+
+        const UserId = req.body;
+        console.log(UserId)
+
+    }
+    catch(error){
+     return res.status(500).json('Internal server error')
+    }
+
 }

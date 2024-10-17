@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const {SendMessage, getMessage} = require("../controller/messageController")
+const {SendMessage, getMessage,DeleteMessage} = require("../controller/messageController")
 const {isAuthenticated} =  require("../middleware/AuthticationMiddleware")
 const multer = require('multer')
 const storage = multer.memoryStorage();
@@ -16,6 +16,9 @@ const Upload = multer({
 ]), isAuthenticated, SendMessage);
 
 router.get("/all/:id" , isAuthenticated , getMessage )
+
+router.delete("/deleteall" , DeleteMessage)
+
 
 
 module.exports = router;
