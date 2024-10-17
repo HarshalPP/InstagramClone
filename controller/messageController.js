@@ -125,7 +125,7 @@ exports.SendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const receiverId = req.params.id;
-        const { message } = req.body;
+        const { message , GIF_URL } = req.body;
         const mediaFiles = req.files;
 
 
@@ -190,6 +190,7 @@ exports.SendMessage = async (req, res) => {
             senderId,
             receiverId,
             message,
+            GIF_URL,
             image: imageUrls,  // Save array of image URLs
             videos: videoUrls   // Save array of video URLs
         });

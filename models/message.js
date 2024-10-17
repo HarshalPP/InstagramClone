@@ -22,6 +22,11 @@ const messageSchema = new mongoose.Schema({
     videos:{
         type: [mongoose.Schema.Types.Mixed],  // Store images as an array
         required: false
+    },
+    
+    GIF_URL:{
+        type: [mongoose.Schema.Types.Mixed],  // Store images as an array
+        required: false
     }
 
 })
