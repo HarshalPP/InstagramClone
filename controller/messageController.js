@@ -12,7 +12,7 @@ cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET,
-  });
+});
 
 // exports.SendMessage = async (req, res) => {
 //     try {
@@ -30,14 +30,14 @@ cloudinary.config({
 //                  .resize({ width: 800, height: 800, fit: 'inside' })
 //                  .toFormat('jpeg', { quality: 80 })
 //                  .toBuffer();
- 
+
 //              const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
 //              const cloudResponse = await cloudinary.uploader.upload(fileURI);
- 
+
 //              // Store each image URL
 //              imageUrls.push(cloudResponse.secure_url);
 //          }
- 
+
 
 //         // find the conversation between sender and receiver
 //         let conversation = await Conversation.findOne({
@@ -127,7 +127,7 @@ exports.SendMessage = async (req, res) => {
         const receiverId = req.params.id;
         const { message } = req.body;
         const mediaFiles = req.files;
-        
+
 
         let imageUrls = [];
         let videoUrls = [];
@@ -152,26 +152,26 @@ exports.SendMessage = async (req, res) => {
 
         // Loop through video files and process
         for (const video of videos) {
-        
+
             // Generate a temporary file path
             const tempFilePath = path.join(os.tmpdir(), video.originalname);
-        
+
             // Write the buffer to the temporary file
             fs.writeFileSync(tempFilePath, video.buffer);
-        
+
             // Upload the video file to Cloudinary
             const cloudResponse = await cloudinary.uploader.upload(tempFilePath, {
                 resource_type: "video",   // Specify video resource type
                 format: "mp4"             // Force conversion to .mp4 format
             });
-        
+
             // Store video URL
             videoUrls.push(cloudResponse.secure_url);
-        
+
             // Delete the temporary file after upload
             fs.unlinkSync(tempFilePath);
         }
-        
+
 
         // Find or create conversation between sender and receiver
         let conversation = await Conversation.findOne({
@@ -279,6 +279,7 @@ exports.DeleteMessage = async (req, res) => {
     try {
         // Extract the list of message IDs from the request body
         const messageIds = req.body.messageIds; // Assuming messageIds is an array of IDs
+        const UserId = req.user._id
 
         // Check if messageIds is an array and not empty
         if (!Array.isArray(messageIds) || messageIds.length === 0) {
@@ -290,6 +291,14 @@ exports.DeleteMessage = async (req, res) => {
 
         // Check if any messages were deleted
         if (deleteResult.deletedCount > 0) {
+
+            messageIds.forEach(messageId => {
+                const getReceiverSocketId = getReceiverSocketId(UserId)
+                if (getReceiverSocketId) {
+                    io.to(getReceiverSocketId).emit('messageDeleted', { messageId })
+                }
+            })
+
             return res.status(200).json({ msg: 'Messages deleted successfully.', deletedCount: deleteResult.deletedCount });
         } else {
             return res.status(404).json({ msg: 'No messages found for the provided IDs.' });
@@ -305,26 +314,26 @@ exports.DeleteMessage = async (req, res) => {
 // Get msg by Id //
 
 
-exports.getMessageById = async(req,res)=>{
-    try{
+exports.getMessageById = async (req, res) => {
+    try {
 
         const MessageId = req.params.id
 
-        if(!MessageId){
+        if (!MessageId) {
             return res.status(400).json('MessageId is not Provided')
         }
 
         const FindMessage = await Message.findById(MessageId)
-        if(!FindMessage){
+        if (!FindMessage) {
             return res.status(404).json('Message is not find')
         }
 
         return res.status(200).json({
-            success:true,
-            msg:FindMessage
+            success: true,
+            msg: FindMessage
         })
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json('Internal Server error')
     }
 }
