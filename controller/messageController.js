@@ -299,3 +299,32 @@ exports.DeleteMessage = async (req, res) => {
         return res.status(500).json({ msg: 'Internal server error', error: error.message });
     }
 };
+
+
+
+// Get msg by Id //
+
+
+exports.getMessageById = async(req,res)=>{
+    try{
+
+        const MessageId = req.params.id
+
+        if(!MessageId){
+            return res.status(400).json('MessageId is not Provided')
+        }
+
+        const FindMessage = await Message.findById(MessageId)
+        if(!FindMessage){
+            return res.status(404).json('Message is not find')
+        }
+
+        return res.status(200).json({
+            success:true,
+            msg:FindMessage
+        })
+
+    }catch(error){
+        return res.status(500).json('Internal Server error')
+    }
+}
