@@ -275,16 +275,27 @@ exports.getMessage = async (req, res) => {
 
 
 
-exports.DeleteMessage = async(req,res)=>{
+exports.DeleteMessage = async (req, res) => {
+    try {
+        // Extract the list of message IDs from the request body
+        const messageIds = req.body.messageIds; // Assuming messageIds is an array of IDs
 
-    try{
+        // Check if messageIds is an array and not empty
+        if (!Array.isArray(messageIds) || messageIds.length === 0) {
+            return res.status(400).json({ msg: 'Invalid input: messageIds should be a non-empty array.' });
+        }
 
-        const UserId = req.body;
-        console.log(UserId)
+        // Delete the messages using the IDs provided
+        const deleteResult = await Message.deleteMany({ _id: { $in: messageIds } });
 
+        // Check if any messages were deleted
+        if (deleteResult.deletedCount > 0) {
+            return res.status(200).json({ msg: 'Messages deleted successfully.', deletedCount: deleteResult.deletedCount });
+        } else {
+            return res.status(404).json({ msg: 'No messages found for the provided IDs.' });
+        }
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({ msg: 'Internal server error', error: error.message });
     }
-    catch(error){
-     return res.status(500).json('Internal server error')
-    }
-
-}
+};
