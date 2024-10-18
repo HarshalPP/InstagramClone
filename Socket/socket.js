@@ -53,6 +53,39 @@ if (userId) {
     // Emit the list of online users
     io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
+
+    // When Group is created , client will join the group's room //
+
+    socket.on('groupCreated' , ({groupId , groupName})=>{
+        console.log(`Group created: ${groupName} (${groupId})`)
+
+
+        // join the newly created group room //
+
+        socket.join(groupId)
+
+        // Notify Participantes they are part of this Group //
+
+        socket.emit('joinedGroup',{
+            groupId,
+            groupName
+        })
+    })
+
+    // Join the chat room for group messages //
+
+    socket.on('joinGroup' , (groupId)=>{
+        console.log(`User ${userId} joined group: ${groupId}`);
+        socket.join(groupId);
+    })
+     
+      // Handle sending a message to a group
+      socket.on('sendGroupMessage', ({ groupId, message }) => {
+        console.log(`New message in group ${groupId}: ${message}`);
+        io.in(groupId).emit('newGroupMessage', { groupId, message });
+    });
+
+
     // // Handle incoming video call from User1 to User2
     // socket.on('callUser', ({ fromUserId, toUserId, roomId }) => {
     //     const receiverSocketId = userSocketMap[toUserId];

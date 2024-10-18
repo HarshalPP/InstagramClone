@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 dotenv.config();
 const {getDataUri}= require("../Utils/datauri")
-const {getReceiverSocketId} = require("../Socket/socket")
+const {getReceiverSocketId , io } = require("../Socket/socket")
 
 // Cloudinary configuration
 cloudinary.config({
@@ -188,4 +188,9 @@ exports.GetReel = async(req,res)=>{
     } catch (error) {
         return res.status(500).json('Internal Server Error')
     }
-}
+} 
+
+
+
+
+
