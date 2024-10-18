@@ -171,6 +171,11 @@ exports.GetReel = async(req,res)=>{
         const findReels = await Reels.find({})
         .sort({createdAt:-1})
         .populate({
+          path:'user',
+          select:'Username profilePicture'
+        })
+
+        .populate({
             path:'likes',
             select:'Username profilePicture'
         })
@@ -179,6 +184,8 @@ exports.GetReel = async(req,res)=>{
             path:'comments.user',
             select:'Username profilePicture'
         })
+
+     
         
         return res.status(200).json({
             message:'Data Reterive Successfully',
