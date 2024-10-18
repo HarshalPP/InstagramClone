@@ -685,6 +685,12 @@ exports.passwordSetup = async (req, res) => {
   
       // Check if the user is already following the target user
       const isFollowing = user.following.includes(targetUserId);
+
+
+      // Fetch updated user details after unfollowing
+      const updatedUser = await User.findById(followingId);
+      const updatedTargetUser = await User.findById(targetUserId);
+      
       
       if (isFollowing) {
         // Unfollow the target user
