@@ -70,15 +70,13 @@ exports.CreateReels = async (req, res) => {
       caption: caption,
     });
 
-    // Emit the Event //
+ 
 
-    const SocketId = getReceiverSocketId(user)
-    if(SocketId){
-      io.to(SocketId).emit('Reels' , newReel)
-    }
-    else{
-      console.log('Receiver is not connected , no notification sent')
-    }
+   // Emit the Event to all users
+   io.emit('ReelCreated', {
+    msg: `${user.username} has created a reel!`,
+    reel: newReel,
+  });
 
 
 
@@ -171,6 +169,7 @@ exports.GetReel = async(req,res)=>{
     try {
 
         const findReels = await Reels.find({})
+        .sort({createdAt:-1})
         .populate({
             path:'likes',
             select:'Username profilePicture'
@@ -180,7 +179,7 @@ exports.GetReel = async(req,res)=>{
             path:'comments.user',
             select:'Username profilePicture'
         })
-
+        
         return res.status(200).json({
             message:'Data Reterive Successfully',
             data:findReels
