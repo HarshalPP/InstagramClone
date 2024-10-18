@@ -240,18 +240,18 @@ exports.DisLike = async (req, res) => {
         const PostownerId = FindPost.author.toString()
         if (PostownerId !== UserId) {
     
-          const notification = {
-            type: 'Dislike',
-            userId: UserId,
-            userDetails: user,
-            PostId,
-            message: 'Your post was Disliked'
+          // const notification = {
+          //   type: 'Dislike',
+          //   userId: UserId,
+          //   userDetails: user,
+          //   PostId,
+          //   message: 'Your post was Disliked'
     
-          }
+          // }
     
-          // // get UserSocketId //
-          const postOwnerSocketId = getReceiverSocketId(PostownerId)
-          io.to(postOwnerSocketId).emit('notification', notification)
+          // // // get UserSocketId //
+          // const postOwnerSocketId = getReceiverSocketId(PostownerId)
+          // io.to(postOwnerSocketId).emit('notification', notification)
     
         }
 
