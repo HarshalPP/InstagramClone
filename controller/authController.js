@@ -695,7 +695,10 @@ exports.passwordSetup = async (req, res) => {
         return res.status(200).json({
           message: 'Unfollowed successfully.',
           success: true,
-          UserDetails:User
+          userDetails: {
+            user: updatedUser,
+            targetUser: updatedTargetUser
+          }
         });
       } else {
         // Follow the target user
@@ -706,7 +709,10 @@ exports.passwordSetup = async (req, res) => {
         return res.status(200).json({
           message: 'Followed successfully.',
           success: true,
-          UserDetails:User
+          userDetails: {
+            user: updatedUser,
+            targetUser: updatedTargetUser
+          }
         });
       }
     } catch (error) {
