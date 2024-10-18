@@ -191,7 +191,9 @@ exports.LikePost = async (req, res) => {
       console.log(postOwnerSocketId , "postOwnerSocketId")
       if (postOwnerSocketId) {
         console.log("Emitting 'notification' event to all connected clients.");
-        io.emit('notification', notification);  // Broadcast to all clients
+        // io.emit('notification', notification);  // Broadcast to all clients
+
+        io.to(postOwnerSocketId).emit('notification' , notification );
         console.log("'notification' event emitted to all clients successfully.");
       } else {
         console.log("No socket ID found for the post owner, but emitting to all clients.");
