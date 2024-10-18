@@ -187,7 +187,7 @@ exports.LikePost = async (req, res) => {
 
       // get UserSocketId //
 
-      const postOwnerSocketId = getReceiverSocketId(UserId)
+      const postOwnerSocketId = getReceiverSocketId(PostId)
       console.log(postOwnerSocketId , "postOwnerSocketId")
       if (postOwnerSocketId) {
         console.log("Emitting 'notification' event to all connected clients.");
