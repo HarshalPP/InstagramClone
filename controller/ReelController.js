@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 dotenv.config();
 const {getDataUri}= require("../Utils/datauri")
+const {getReceiverSocketId} = require("../Socket/socket")
 
 // Cloudinary configuration
 cloudinary.config({
@@ -68,6 +69,18 @@ exports.CreateReels = async (req, res) => {
       videoUrl: cloudResponse.secure_url,
       caption: caption,
     });
+
+    // Emit the Event //
+
+    const SocketId = getReceiverSocketId(user)
+    if(SocketId){
+      io.to(SocketId).emit('Reels' , newReel)
+    }
+    else{
+      console.log('Receiver is not connected , no notification sent')
+    }
+
+
 
     return res.status(201).json({
       msg: 'Reel created successfully',
