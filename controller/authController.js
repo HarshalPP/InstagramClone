@@ -649,7 +649,7 @@ exports.passwordSetup = async (req, res) => {
   
       // Fetch groups where the current user is a participant
       const GroupData = await Group.find({
-        participants: { $in: [req.user._id] }, // Only groups where req.user._id is a participant
+        participants: { $in: [req.user._id] }, 
       })
         .populate({
           path: 'participants',
