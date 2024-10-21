@@ -68,3 +68,34 @@ exports.createGroup = async (req, res) => {
         });
     }
 };
+
+
+
+exports.fetchAllChats = async (req, res) => {
+    try {
+      const chats = await Group.find({
+        participants: {
+          $elemMatch: {
+            $eq: req.user.id,
+          },
+        },
+      })
+        .populate('participants')
+        .populate('messages')
+        .populate('groupAdmin')
+        .sort({ updatedAt: -1 });
+  
+      return res.status(200).json({
+        success: true,
+        data: chats,
+      });
+    } catch (error) {
+      console.error('Error fetching chats:', error.message);  // Log the error for debugging
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message,
+      });
+    }
+  };
+  
