@@ -638,7 +638,6 @@ exports.passwordSetup = async (req, res) => {
         $ne:req.user.id
        }})
        .sort({createdAt:-1})
-       .limit(5)
        .select("-password")
 
        if(!findUser){
