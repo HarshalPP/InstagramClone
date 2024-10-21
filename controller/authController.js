@@ -647,6 +647,16 @@ exports.passwordSetup = async (req, res) => {
        }
 
        const GroupData = await Group.find({})
+       .populate({
+        path:'participants',
+        select:'Username profilePicture'
+       })
+       .populate('messages')
+       .populate({
+        path:'groupAdmin',
+        select:'Username profilePicture'
+       })
+       .sort({ updatedAt: -1 });
        return res.status(200).json({
         success:true,
         Users:findUser,
