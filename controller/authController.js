@@ -633,42 +633,46 @@ exports.passwordSetup = async (req, res) => {
 
 
   
-  exports.getsuggestedUsers = async(req,res)=>{
-    try{
-       const findUser = await User.find({_id:{
-        $ne:req.user.id
-       }})
-       .sort({createdAt:-1})
-       .limit(10)
-       .select("-password")
-
-
-       if(!findUser){
-        return res.status(400).json('No User is Found')
-       }
-
-       const GroupData = await Group.find({})
-       .populate({
-        path:'participants',
-        select:'Username profilePicture'
-       })
-       .populate('messages')
-       .populate({
-        path:'groupAdmin',
-        select:'Username profilePicture'
-       })
-       .sort({ updatedAt: -1 });
-       return res.status(200).json({
-        success:true,
-        Users:findUser,
-        Groups:GroupData
-
-       })
+  exports.getsuggestedUsers = async (req, res) => {
+    try {
+      // Fetch suggested users (excluding the current user)
+      const findUser = await User.find({
+        _id: { $ne: req.user.id },
+      })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('-password');
+  
+      if (!findUser) {
+        return res.status(400).json('No User is Found');
+      }
+  
+      // Fetch groups where the current user is a participant
+      const GroupData = await Group.find({
+        participants: { $in: [req.user._id] }, // Only groups where req.user._id is a participant
+      })
+        .populate({
+          path: 'participants',
+          select: 'Username profilePicture',
+        })
+        .populate('messages')
+        .populate({
+          path: 'groupAdmin',
+          select: 'Username profilePicture',
+        })
+        .sort({ updatedAt: -1 });
+  
+      // Return the users and groups
+      return res.status(200).json({
+        success: true,
+        Users: findUser,
+        Groups: GroupData,
+      });
+    } catch (error) {
+      return res.status(500).json('Internal Server Error');
     }
-    catch(error){
-    return res.status(500).json('Internal Server Error')
-    }
-  }
+  };
+  
 
 
 
