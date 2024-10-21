@@ -1,4 +1,5 @@
 const Reels = require("../models/ReelModel");
+const User = require("../models/User")
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 const path = require('path');
@@ -69,6 +70,25 @@ exports.CreateReels = async (req, res) => {
       videoUrl: cloudResponse.secure_url,
       caption: caption,
     });
+
+
+
+    // Update the Users Models //
+
+    // Firstly we will find the Users //
+
+    const findUser = await User.findById(user)
+    if(!findUser){
+      return res.status(404).json('No User found')
+    }
+
+    await User.updateOne({
+      _id:user
+    },{
+      $push:{
+        Reels:newReel._id
+      }
+    })
 
  
 

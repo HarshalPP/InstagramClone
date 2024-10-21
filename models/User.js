@@ -47,6 +47,11 @@ const UserSchema = new mongoose.Schema({
         ref:'Post'
     }],
 
+    Reels:[{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Reel'
+    }],
+
 
     activeToken:{type:String},
     tokenExpiry: { type: Date }, // Add expiry date for the token
