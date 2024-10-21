@@ -639,7 +639,7 @@ exports.passwordSetup = async (req, res) => {
         $ne:req.user.id
        }})
        .sort({createdAt:-1})
-       .limit(20)
+       .limit(10)
        .select("-password")
 
 
