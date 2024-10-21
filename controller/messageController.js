@@ -249,7 +249,7 @@ exports.SendMessage = async (req, res) => {
         const { message, GIF_URL } = req.body;
         const mediaFiles = req.files;
         const groupId = req.params.groupId || null; // Get groupId if provided
-        const receiverId = req.params.receiverId; // Use receiverId for direct messages
+        const receiverId = req.params.receiverId;   // Use receiverId for direct messages
 
         let imageUrls = [];
         let videoUrls = [];
@@ -357,11 +357,24 @@ exports.SendMessage = async (req, res) => {
             notificationMessage: 'You have a new message',
         };
 
-        const socketId = groupId ? getReceiverSocketId(groupId) : getReceiverSocketId(receiverId);
-        if (socketId) {
-            io.to(socketId).emit('messageNotification', notification);
+        // Send notification to group or receiver based on the context
+        if (groupId) {
+            // Send notification to group participants
+            const group = await Group.findById(groupId).populate('participants');
+            group.participants.forEach((participant) => {
+                const socketId = getReceiverSocketId(participant._id);
+                if (socketId) {
+                    io.to(socketId).emit('messageNotification', notification);
+                }
+            });
         } else {
-            console.log('Receiver is not connected, no notification sent');
+            // Direct message notification
+            const socketId = getReceiverSocketId(receiverId);
+            if (socketId) {
+                io.to(socketId).emit('messageNotification', notification);
+            } else {
+                console.log('Receiver is not connected, no notification sent');
+            }
         }
 
         // Send response
@@ -378,6 +391,7 @@ exports.SendMessage = async (req, res) => {
         });
     }
 };
+;
 
 
 
