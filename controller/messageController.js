@@ -466,7 +466,7 @@ exports.SendMessage = async (req, res) => {
             });
 
             // Add new message to conversation
-            conversation.messages.push(newMessage._id);
+            conversation.message.push(newMessage._id);
             await conversation.save();
 
             // Notify receiver via socket
