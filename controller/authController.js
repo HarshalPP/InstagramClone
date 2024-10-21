@@ -1,5 +1,6 @@
 const User = require("../models/User")
 const Post = require("../models/Post")
+const Group = require("../models/group")
 const { sendToken } = require("../Utils/Token")
 const jwt = require('jsonwebtoken')
 const csv = require('csv-parser');  // Assuming you're using CSV data
@@ -640,13 +641,16 @@ exports.passwordSetup = async (req, res) => {
        .sort({createdAt:-1})
        .select("-password")
 
+
        if(!findUser){
         return res.status(400).json('No User is Found')
        }
 
+       const GroupData = await Group.find({})
        return res.status(200).json({
         success:true,
-        Users:findUser
+        Users:findUser,
+        Groups:GroupData
 
        })
     }

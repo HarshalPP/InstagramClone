@@ -53,6 +53,8 @@ const UserSchema = new mongoose.Schema({
     }],
 
 
+
+
     activeToken:{type:String},
     tokenExpiry: { type: Date }, // Add expiry date for the token
     passwordChangedAt: Date,
