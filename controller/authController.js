@@ -770,6 +770,7 @@ exports.GetProfile = async(req,res)=>{
     .populate('following')
     .populate('posts')
     .populate('bookmarks')
+    .populate('Reels')
     if(!GetUser){
       return res.status(404).json('User not Found')
     }
