@@ -444,6 +444,7 @@ exports.SendMessage = async (req, res) => {
 
         // Check if receiverId is a group or an individual
         if (receiverId) {
+            console.log("ReceiverId---------->>>>>>>>>>> ")
             // Direct message logic
             let conversation = await Conversation.findOne({
                 participants: { $all: [senderId, receiverId] }
@@ -476,6 +477,8 @@ exports.SendMessage = async (req, res) => {
             }
 
         } else {
+
+            console.log("GroupId------------>>>>>>>>>>>> ")
             // If no receiverId, handle it as a group message
             // Assuming you have a way to determine the groupId from senderId
             const group = await Group.findOne({ participants: senderId }); // Logic to find the group
