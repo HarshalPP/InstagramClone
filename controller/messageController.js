@@ -341,6 +341,8 @@ exports.SendMessage = async (req, res) => {
             conversation.message.push(newMessage._id);
             await conversation.save();
 
+            console.log("receiverid" , receiverId)
+
             // Notify receiver via socket
             const socketId = getReceiverSocketId(receiverId);
             if (socketId) {
