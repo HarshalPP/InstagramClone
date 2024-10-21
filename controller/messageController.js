@@ -289,6 +289,7 @@ exports.SendMessage = async (req, res) => {
         let newMessage;
 
         if (groupId) {
+            console.log("Enter in Group")
             // Group chat message
             newMessage = await Message.create({
                 senderId,
@@ -315,6 +316,7 @@ exports.SendMessage = async (req, res) => {
 
         } else {
             // Direct message logic
+            console.log("Indival msg")
             let conversation = await Conversation.findOne({
                 participants: { $all: [senderId, receiverId] }
             });
