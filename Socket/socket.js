@@ -34,7 +34,8 @@ console.log("Initial UserSocketMap:", userSocketMap);
 
 
 // Handle socket connection
-io.on('connection', (socket) => {
+io.on('connection', async(socket) => {
+    try{
     const userId = socket.handshake.query.userId;
 if (userId) {
     userSocketMap[userId] = socket.id;
@@ -122,6 +123,12 @@ if (userId) {
         }
         io.emit('getOnlineUsers', Object.keys(userSocketMap));
     });
+
+
+    }
+    catch(error){
+        res.status(500).json('Socket Connection failed..')
+    }
 });
 
 
