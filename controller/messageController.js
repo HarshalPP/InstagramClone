@@ -249,7 +249,7 @@ exports.SendMessage = async (req, res) => {
         const { message, GIF_URL } = req.body;
         const mediaFiles = req.files;
         const groupId = req.params.groupId || null; // Get groupId if provided
-        const receiverId = req.params.receiverId;   // Use receiverId for direct messages
+        const receiverId = req.params.id;   // Use receiverId for direct messages
 
         let imageUrls = [];
         let videoUrls = [];
