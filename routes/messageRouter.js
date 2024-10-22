@@ -15,7 +15,10 @@ const Upload = multer({
     { name: 'video', maxCount: 5 }
 ]), isAuthenticated, SendMessage);
 
-router.post("/send/group/:groupId" ,isAuthenticated, SendMessage )
+router.post("/send/group/:groupId" ,Upload.fields([
+  { name: 'image', maxCount: 10 },
+  { name: 'video', maxCount: 5 }
+]), isAuthenticated, SendMessage )
 
 router.get("/all/:id" , isAuthenticated , getMessage )
 
