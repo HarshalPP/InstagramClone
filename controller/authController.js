@@ -518,40 +518,42 @@ exports.verifytoken = async(req,res)=>{
 
 // Get Users data //
 exports.GetUsers = async (req, res) => {
-    try {
+  try {
+    // Extract the search query for username from the request query parameters
+    const { search } = req.query;
+    let query = {};
 
-      const {search} = req.query
-      let query = {}
+    // If a search term is provided, search by the username field using regex
+    if (search) {
+      query.Username = { $regex: search, $options: 'i' }; // 'i' for case-insensitive
+    }
+     
+    // Fetch users based on the query (searching by username if provided)
+    const findUsers = await User.find(query);
 
-      if(search){
-        query.search = {$regex:search , $options:'i'}
-      }
-       
-      // Fetch users and populate investments and company details within investments
-      const findUsers = await User.find(query)
-
-      // Check if users were found
-      if (!findUsers || findUsers.length === 0) {
-        return res.status(404).json({
-          message: 'No users found'
-        });
-      }
-  
-      // Return the populated user data
-      return res.status(200).json({
-        message: 'Data retrieved successfully',
-        data: findUsers
-      });
-  
-    } catch (error) {
-      // Log and handle server errors
-      console.error('Error retrieving users:', error);
-      return res.status(500).json({
-        msg: 'Internal server error',
-        error: error.message
+    // Check if users were found
+    if (!findUsers || findUsers.length === 0) {
+      return res.status(404).json({
+        message: 'No users found'
       });
     }
-  };
+
+    // Return the found user data
+    return res.status(200).json({
+      message: 'Data retrieved successfully',
+      data: findUsers
+    });
+
+  } catch (error) {
+    // Log and handle server errors
+    console.error('Error retrieving users:', error);
+    return res.status(500).json({
+      msg: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
   
              // Password setup //
 
