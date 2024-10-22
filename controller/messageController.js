@@ -308,7 +308,7 @@ exports.SendMessage = async (req, res) => {
             // Emit message to all group participants
             const group = await Group.findById(groupId).populate('participants');
             group.participants.forEach((participant) => {
-                console.log("participant" , participant)
+                console.log("participant" , participant._id)
                 const socketId = getReceiverSocketId(participant._id);
                 if (socketId) {
                     io.to(socketId).emit('newMessage', newMessage);
