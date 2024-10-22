@@ -94,7 +94,7 @@ exports.getPost = async (req, res) => {
 
       .populate({
         path: 'comments',
-        select: 'text liked Count currentDate',
+        select: 'text liked Count createdAt',
         sort: { createdAt: -1 },
         populate: {
           path: 'author',
