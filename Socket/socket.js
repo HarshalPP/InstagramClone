@@ -113,6 +113,32 @@ if (userId) {
     //     }
     // });
 
+    // Handle Typing Event //
+
+    socket.on('typing', ({fromUserId , toUserId})=>{
+     console.log(`User ${fromUserId} is typing a message to ${toUserId}`)
+
+     const receiverSocketId = userSocketMap[toUserId]
+     if(receiverSocketId){
+        io.to(receiverSocketId).emit('userTyping',{
+            fromUserId,
+            message: `${fromUserId} is typing...`
+        })
+     }
+    })
+
+     // Handle stopTyping event
+     socket.on('stopTyping', ({ fromUserId, toUserId }) => {
+        console.log(`User ${fromUserId} stopped typing a message to ${toUserId}`);
+        const receiverSocketId = userSocketMap[toUserId];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('userStoppedTyping', {
+                fromUserId,
+                message: `${fromUserId} stopped typing`
+            });
+        }
+    });
+
     // Handle socket disconnection
     socket.on('disconnect', () => {
         if (userId) {

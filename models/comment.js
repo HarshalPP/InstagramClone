@@ -18,6 +18,12 @@ const commentSchema = new mongoose.Schema({
         required:true
     },
 
+    currentDate:{
+    type:Date,
+    required:false,
+    default:Date.now()
+    },
+
     liked:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
