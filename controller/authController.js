@@ -519,8 +519,16 @@ exports.verifytoken = async(req,res)=>{
 // Get Users data //
 exports.GetUsers = async (req, res) => {
     try {
+
+      const {search} = req.query
+      let query = {}
+
+      if(search){
+        query.search = {$regex:search , $options:'i'}
+      }
+       
       // Fetch users and populate investments and company details within investments
-      const findUsers = await User.find({})
+      const findUsers = await User.find(query)
 
       // Check if users were found
       if (!findUsers || findUsers.length === 0) {
