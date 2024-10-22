@@ -15,6 +15,8 @@ const Upload = multer({
     { name: 'video', maxCount: 5 }
 ]), isAuthenticated, SendMessage);
 
+router.post("/send/group/:groupId" ,isAuthenticated, SendMessage )
+
 router.get("/all/:id" , isAuthenticated , getMessage )
 
 router.delete("/deleteall" , isAuthenticated , DeleteMessage)

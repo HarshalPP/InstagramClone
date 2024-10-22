@@ -243,166 +243,13 @@ cloudinary.config({
 
 
 
-// exports.SendMessage = async (req, res) => {
-//     try {
-//         const senderId = req.user._id;
-//         const { message, GIF_URL } = req.body;
-//         const mediaFiles = req.files;
-//         const groupId = req.params.groupId || null; // Get groupId if provided
-//         const receiverId = req.params.id;   // Use receiverId for direct messages
-
-//         let imageUrls = [];
-//         let videoUrls = [];
-
-//         // Check if image and video fields exist in req.files
-//         const images = mediaFiles['image'] || [];
-//         const videos = mediaFiles['video'] || [];
-
-//         // Process and upload images
-//         for (const image of images) {
-//             const optimizedImageBuffer = await sharp(image.buffer)
-//                 .resize({ width: 800, height: 800, fit: 'inside' })
-//                 .toFormat('jpeg', { quality: 80 })
-//                 .toBuffer();
-
-//             const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
-//             const cloudResponse = await cloudinary.uploader.upload(fileURI);
-
-//             // Store image URL
-//             imageUrls.push(cloudResponse.secure_url);
-//         }
-
-//         // Process and upload videos
-//         for (const video of videos) {
-//             const tempFilePath = path.join(os.tmpdir(), video.originalname);
-//             fs.writeFileSync(tempFilePath, video.buffer);
-
-//             const cloudResponse = await cloudinary.uploader.upload(tempFilePath, {
-//                 resource_type: "video", // Specify video resource type
-//                 format: "mp4"           // Force conversion to .mp4 format
-//             });
-
-//             videoUrls.push(cloudResponse.secure_url);
-//             fs.unlinkSync(tempFilePath); // Delete temp file after upload
-//         }
-
-//         let newMessage;
-
-//         if (groupId) {
-//             console.log("Enter in Group")
-//             // Group chat message
-//             newMessage = await Message.create({
-//                 senderId,
-//                 message,
-//                 GIF_URL,
-//                 GroupId: groupId,
-//                 image: imageUrls,
-//                 videos: videoUrls,
-//             });
-
-//             // Add new message to group
-//             await Group.findByIdAndUpdate(groupId, {
-//                 $push: { messages: newMessage._id }
-//             });
-
-//             // Emit message to all group participants
-//             const group = await Group.findById(groupId).populate('participants');
-//             group.participants.forEach((participant) => {
-//                 const socketId = getReceiverSocketId(participant._id);
-//                 if (socketId) {
-//                     io.to(socketId).emit('newMessage', newMessage);
-//                 }
-//             });
-
-//         } else {
-//             // Direct message logic
-//             console.log("Indival msg")
-//             let conversation = await Conversation.findOne({
-//                 participants: { $all: [senderId, receiverId] }
-//             });
-
-//             if (!conversation) {
-//                 conversation = await Conversation.create({
-//                     participants: [senderId, receiverId],
-//                     messages: []
-//                 });
-//             }
-
-//             newMessage = await Message.create({
-//                 senderId,
-//                 receiverId,
-//                 message,
-//                 GIF_URL,
-//                 image: imageUrls,
-//                 videos: videoUrls
-//             });
-
-//             // Add new message to conversation
-//             conversation.message.push(newMessage._id);
-//             await conversation.save();
-
-//             console.log("receiverid" , receiverId)
-
-//             // Notify receiver via socket
-//             const socketId = getReceiverSocketId(receiverId);
-//             if (socketId) {
-//                 io.to(socketId).emit('newMessage', newMessage);
-//             }
-//         }
-
-//         // Notify receiver (or group) of new message
-//         const sender = await User.findById(senderId).select('Username profilePicture');
-//         const notification = {
-//             type: 'message',
-//             senderId,
-//             senderDetails: sender,
-//             message,
-//             messageId: newMessage._id,
-//             notificationMessage: 'You have a new message',
-//         };
-
-//         // Send notification to group or receiver based on the context
-//         if (groupId) {
-//             // Send notification to group participants
-//             const group = await Group.findById(groupId).populate('participants');
-//             group.participants.forEach((participant) => {
-//                 const socketId = getReceiverSocketId(participant._id);
-//                 if (socketId) {
-//                     io.to(socketId).emit('messageNotification', notification);
-//                 }
-//             });
-//         } else {
-//             // Direct message notification
-//             const socketId = getReceiverSocketId(receiverId);
-//             if (socketId) {
-//                 io.to(socketId).emit('messageNotification', notification);
-//             } else {
-//                 console.log('Receiver is not connected, no notification sent');
-//             }
-//         }
-
-//         // Send response
-//         return res.status(201).json({
-//             success: true,
-//             newMessage
-//         });
-
-//     } catch (error) {
-//         console.error('Error sending message:', error.message);
-//         return res.status(500).json({
-//             msg: 'Internal Server Error',
-//             error: error.message
-//         });
-//     }
-// };
-
-
 exports.SendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const { message, GIF_URL } = req.body;
         const mediaFiles = req.files;
-        const receiverId = req.params.id; // Use receiverId for direct messages
+        const groupId = req.params.groupId || null; // Get groupId if provided
+        const receiverId = req.params.id;   // Use receiverId for direct messages
 
         let imageUrls = [];
         let videoUrls = [];
@@ -440,12 +287,36 @@ exports.SendMessage = async (req, res) => {
         }
 
         let newMessage;
-        let groupId;
 
-        // Check if receiverId is a group or an individual
-        if (receiverId) {
-            console.log("ReceiverId---------->>>>>>>>>>> ")
+        if (groupId) {
+            console.log("Enter in Group")
+            // Group chat message
+            newMessage = await Message.create({
+                senderId,
+                message,
+                GIF_URL,
+                GroupId: groupId,
+                image: imageUrls,
+                videos: videoUrls,
+            });
+
+            // Add new message to group
+            await Group.findByIdAndUpdate(groupId, {
+                $push: { messages: newMessage._id }
+            });
+
+            // Emit message to all group participants
+            const group = await Group.findById(groupId).populate('participants');
+            group.participants.forEach((participant) => {
+                const socketId = getReceiverSocketId(participant._id);
+                if (socketId) {
+                    io.to(socketId).emit('newMessage', newMessage);
+                }
+            });
+
+        } else {
             // Direct message logic
+            console.log("Indival msg")
             let conversation = await Conversation.findOne({
                 participants: { $all: [senderId, receiverId] }
             });
@@ -470,49 +341,13 @@ exports.SendMessage = async (req, res) => {
             conversation.message.push(newMessage._id);
             await conversation.save();
 
+            console.log("receiverid" , receiverId)
+
             // Notify receiver via socket
             const socketId = getReceiverSocketId(receiverId);
             if (socketId) {
                 io.to(socketId).emit('newMessage', newMessage);
             }
-
-        } else {
-
-            console.log("GroupId------------>>>>>>>>>>>> ")
-            // If no receiverId, handle it as a group message
-            // Assuming you have a way to determine the groupId from senderId
-            const group = await Group.findOne({ participants: senderId }); // Logic to find the group
-
-            if (!group) {
-                return res.status(400).json({
-                    success: false,
-                    message: "No group found for the sender"
-                });
-            }
-
-            groupId = group._id;
-
-            newMessage = await Message.create({
-                senderId,
-                message,
-                GIF_URL,
-                GroupId: groupId,
-                image: imageUrls,
-                videos: videoUrls,
-            });
-
-            // Add new message to group
-            await Group.findByIdAndUpdate(groupId, {
-                $push: { messages: newMessage._id }
-            });
-
-            // Emit message to all group participants
-            group.participants.forEach((participant) => {
-                const socketId = getReceiverSocketId(participant._id);
-                if (socketId) {
-                    io.to(socketId).emit('newMessage', newMessage);
-                }
-            });
         }
 
         // Notify receiver (or group) of new message
@@ -527,15 +362,7 @@ exports.SendMessage = async (req, res) => {
         };
 
         // Send notification to group or receiver based on the context
-        if (receiverId) {
-            // Direct message notification
-            const socketId = getReceiverSocketId(receiverId);
-            if (socketId) {
-                io.to(socketId).emit('messageNotification', notification);
-            } else {
-                console.log('Receiver is not connected, no notification sent');
-            }
-        } else if (groupId) {
+        if (groupId) {
             // Send notification to group participants
             const group = await Group.findById(groupId).populate('participants');
             group.participants.forEach((participant) => {
@@ -544,6 +371,14 @@ exports.SendMessage = async (req, res) => {
                     io.to(socketId).emit('messageNotification', notification);
                 }
             });
+        } else {
+            // Direct message notification
+            const socketId = getReceiverSocketId(receiverId);
+            if (socketId) {
+                io.to(socketId).emit('messageNotification', notification);
+            } else {
+                console.log('Receiver is not connected, no notification sent');
+            }
         }
 
         // Send response
@@ -560,6 +395,171 @@ exports.SendMessage = async (req, res) => {
         });
     }
 };
+
+
+// exports.SendMessage = async (req, res) => {
+//     try {
+//         const senderId = req.user._id;
+//         const { message, GIF_URL } = req.body;
+//         const mediaFiles = req.files;
+//         const receiverId = req.params.id; // Use receiverId for direct messages
+
+//         let imageUrls = [];
+//         let videoUrls = [];
+
+//         // Check if image and video fields exist in req.files
+//         const images = mediaFiles['image'] || [];
+//         const videos = mediaFiles['video'] || [];
+
+//         // Process and upload images
+//         for (const image of images) {
+//             const optimizedImageBuffer = await sharp(image.buffer)
+//                 .resize({ width: 800, height: 800, fit: 'inside' })
+//                 .toFormat('jpeg', { quality: 80 })
+//                 .toBuffer();
+
+//             const fileURI = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+//             const cloudResponse = await cloudinary.uploader.upload(fileURI);
+
+//             // Store image URL
+//             imageUrls.push(cloudResponse.secure_url);
+//         }
+
+//         // Process and upload videos
+//         for (const video of videos) {
+//             const tempFilePath = path.join(os.tmpdir(), video.originalname);
+//             fs.writeFileSync(tempFilePath, video.buffer);
+
+//             const cloudResponse = await cloudinary.uploader.upload(tempFilePath, {
+//                 resource_type: "video", // Specify video resource type
+//                 format: "mp4"           // Force conversion to .mp4 format
+//             });
+
+//             videoUrls.push(cloudResponse.secure_url);
+//             fs.unlinkSync(tempFilePath); // Delete temp file after upload
+//         }
+
+//         let newMessage;
+//         let groupId;
+
+//         // Check if receiverId is a group or an individual
+//         if (receiverId) {
+//             console.log("ReceiverId---------->>>>>>>>>>> ")
+//             // Direct message logic
+//             let conversation = await Conversation.findOne({
+//                 participants: { $all: [senderId, receiverId] }
+//             });
+
+//             if (!conversation) {
+//                 conversation = await Conversation.create({
+//                     participants: [senderId, receiverId],
+//                     messages: []
+//                 });
+//             }
+
+//             newMessage = await Message.create({
+//                 senderId,
+//                 receiverId,
+//                 message,
+//                 GIF_URL,
+//                 image: imageUrls,
+//                 videos: videoUrls
+//             });
+
+//             // Add new message to conversation
+//             conversation.message.push(newMessage._id);
+//             await conversation.save();
+
+//             // Notify receiver via socket
+//             const socketId = getReceiverSocketId(receiverId);
+//             if (socketId) {
+//                 io.to(socketId).emit('newMessage', newMessage);
+//             }
+
+//         } else {
+
+//             console.log("GroupId------------>>>>>>>>>>>> ")
+//             // If no receiverId, handle it as a group message
+//             // Assuming you have a way to determine the groupId from senderId
+//             const group = await Group.findOne({ participants: senderId }); // Logic to find the group
+
+//             if (!group) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "No group found for the sender"
+//                 });
+//             }
+
+//             groupId = group._id;
+
+//             newMessage = await Message.create({
+//                 senderId,
+//                 message,
+//                 GIF_URL,
+//                 GroupId: groupId,
+//                 image: imageUrls,
+//                 videos: videoUrls,
+//             });
+
+//             // Add new message to group
+//             await Group.findByIdAndUpdate(groupId, {
+//                 $push: { messages: newMessage._id }
+//             });
+
+//             // Emit message to all group participants
+//             group.participants.forEach((participant) => {
+//                 const socketId = getReceiverSocketId(participant._id);
+//                 if (socketId) {
+//                     io.to(socketId).emit('newMessage', newMessage);
+//                 }
+//             });
+//         }
+
+//         // Notify receiver (or group) of new message
+//         const sender = await User.findById(senderId).select('Username profilePicture');
+//         const notification = {
+//             type: 'message',
+//             senderId,
+//             senderDetails: sender,
+//             message,
+//             messageId: newMessage._id,
+//             notificationMessage: 'You have a new message',
+//         };
+
+//         // Send notification to group or receiver based on the context
+//         if (receiverId) {
+//             // Direct message notification
+//             const socketId = getReceiverSocketId(receiverId);
+//             if (socketId) {
+//                 io.to(socketId).emit('messageNotification', notification);
+//             } else {
+//                 console.log('Receiver is not connected, no notification sent');
+//             }
+//         } else if (groupId) {
+//             // Send notification to group participants
+//             const group = await Group.findById(groupId).populate('participants');
+//             group.participants.forEach((participant) => {
+//                 const socketId = getReceiverSocketId(participant._id);
+//                 if (socketId) {
+//                     io.to(socketId).emit('messageNotification', notification);
+//                 }
+//             });
+//         }
+
+//         // Send response
+//         return res.status(201).json({
+//             success: true,
+//             newMessage
+//         });
+
+//     } catch (error) {
+//         console.error('Error sending message:', error.message);
+//         return res.status(500).json({
+//             msg: 'Internal Server Error',
+//             error: error.message
+//         });
+//     }
+// };
 
 
 
