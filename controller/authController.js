@@ -36,6 +36,8 @@ exports.Register = async (req, res) => {
         const { Username, email, password, bio , gender} = req.body;
         const profilePicture = req.file;
 
+  
+
         let cloudResponse;
         if (profilePicture) {
           const fileUri = getDataUri(profilePicture)

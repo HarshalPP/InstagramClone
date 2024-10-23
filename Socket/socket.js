@@ -122,7 +122,7 @@ if (userId) {
      if(receiverSocketId){
         io.to(receiverSocketId).emit('userTyping',{
             fromUserId,
-            message: `${fromUserId} is typing...`
+            message: `typing...`
         })
      }
     })
